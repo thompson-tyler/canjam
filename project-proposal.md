@@ -1,12 +1,11 @@
-# CONCURRENCY FINAL PROJECT: [ NAME ]
+# CONCURRENCY FINAL PROJECT: JAMCAN
 
 ## 1. Team Name
-
-What is your team name? (Keep it relatively short, clean, and free of embedded spaces or other special characters. — we'll use this internally for grading.)
 
 Our team name is JamCan.
 
 ## 2. Group Members
+
 Our members are Skylar, Tyler, Cece, and Roger.
 
 ## 3. Project
@@ -31,11 +30,9 @@ Maximum: We would extend the canvas app with a bevy of features:
 - Clients may record jam sessions and export the recorded sessions to a file.
 - If the client hosting a room dies, another client automatically becomes the
 host; this is made possible through our peer-to-peer architecture.
-- Add ripples, delay, envelope, and other graphical or musical sparkles. 
+- Add ripples, delay, envelope, and other graphical or musical sparkles.
 
 ## 5. First Steps
-
-What's your first step?
 
 Our first step is to develop a PTP architecture model for our application. On
 our own, we will learn PyGame or another Python GUI package so we can start
@@ -44,6 +41,6 @@ programming.
 
 ## 6. Biggest Problem
 
-What's the biggest problem you foresee or question you need to answer to get started?
-
-Designing a PTP architecture that can accommodate many users
+One of the largest problems that could come up is designing a distributed
+system that shares sounds with low enough latency to accomplish the goal of
+being live and collaborative.
