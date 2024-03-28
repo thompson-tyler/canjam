@@ -1,6 +1,6 @@
 import time
 import numpy
-# import pyaudio
+import pyaudio
 import fluidsynth
 
 SAMPLE_RATE = 44100

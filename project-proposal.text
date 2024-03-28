@@ -65,3 +65,18 @@ for solutions failed, we opted to try just installing both onto our computers
 sans venv's and it works that way. Ultimately we hope to get the venv thing
 figured out for this as it is so annoying for linking, but alas, this is the 
 best we can manage. 
+
+
+## Packages
+fluidsynth: synth library, that supports soundfonts and synth channels, we 
+            will be using their synths
+pyfluidsynth: fluidsynth bindings for python to use 
+              https://github.com/nwhitehead/pyfluidsynth
+
+
+pyaudio: audio library to create audio channels for pyfluidsynth to use 
+
+pygame: the main game engine for our game, library for the pygame and other 
+        functions 
+
+numpy: reqired for pyfluidsynth's frames 
