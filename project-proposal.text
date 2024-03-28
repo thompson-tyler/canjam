@@ -44,3 +44,24 @@ programming.
 One of the largest problems that could come up is designing a distributed
 system that shares sounds with low enough latency to accomplish the goal of
 being live and collaborative.
+
+## additional notes on libraries and getting noises and instruments to 
+work in pygame. 
+
+Although there is a bevy of ways to get noise to work in pygame midi and not 
+midi, most are either a bit dated or require funds (tragically). Due to this 
+we will be using flyidsynth a program for digital synthesizers as it supports
+soundfount, and thus many digital instruments Given that fluidsynth is not 
+python we will also be using the pyfluidsynth package, for fluidsynth bindings. 
+To get our synths and sounds. For a demo see fuid-test.py examples. 
+
+difficulties
+One challenge we have already faced is library and version difficulty with 
+correctly importing the pyfluidsynth library and fluidsynth, a tragic bug 
+we encountered was getting both to work in a conda virtual environment, 
+we refrenced these we will be using to play noises for the game. 
+After refrencing https://github.com/nwhitehead/pyfluidsynth/issues/40, 
+for solutions failed, we opted to try just installing both onto our computers
+sans venv's and it works that way. Ultimately we hope to get the venv thing
+figured out for this as it is so annoying for linking, but alas, this is the 
+best we can manage. 
