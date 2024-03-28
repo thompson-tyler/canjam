@@ -68,15 +68,28 @@ best we can manage.
 
 
 ## Packages
+
 fluidsynth: synth library, that supports soundfonts and synth channels, we 
             will be using their synths
+            docs link: https://www.fluidsynth.org
+            version: 2.3.4
+
+
 pyfluidsynth: fluidsynth bindings for python to use 
-              https://github.com/nwhitehead/pyfluidsynth
+              docs link: https://github.com/nwhitehead/pyfluidsynth
+              version: 0.2
 
 
 pyaudio: audio library to create audio channels for pyfluidsynth to use 
+         docs link: https://pypi.org/project/PyAudio/
+         version: 0.2.14.
+
 
 pygame: the main game engine for our game, library for the pygame and other 
-        functions 
+        functions
+        docs link: https://www.pygame.org
+        version: 2.5.2
 
 numpy: reqired for pyfluidsynth's frames 
+       docs link: https://numpy.org    
+       version: 
