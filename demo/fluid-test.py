@@ -30,7 +30,7 @@ class CanJamSynth:
     def __init__(self, start_channel) -> None:
         """
         CanJanSynth: creates a synth, with defined presets
-        note: if you have fewer than 2 channels on your computer this will need
+        note: If you have fewer than 2 channels on your computer this will need
         to be changed.
         """
         self.SAMPLE_RATE = DEFAULT_SAMPLE_RATE
@@ -46,7 +46,7 @@ class CanJamSynth:
                         output = True)
         self.current_channel = start_channel
         self.current_velocity = DEFAULT_VELOCITY
-        self.bindings = bindings = {"D" : 60} # TODO load this in from a file
+        self.bindings = {"D" : 60} # TODO load this in from a file
         self.load_all_sfs()
 
     def __del__(self):
@@ -66,8 +66,12 @@ class CanJamSynth:
         self.play_note(note)
 
     def play_note(self, noteval: int):
+        s = []
         self.synth.noteon(self.current_channel, noteval, self.current_velocity)
-        audio = fluidsynth.raw_audio_string(self.synth.get_samples(self.SAMPLE_RATE // 2))
+        s = numpy.append(s, self.synth.get_samples(self.SAMPLE_RATE * 1))
+        self.synth.noteoff(self.current_channel, noteval)
+        s = numpy.append(s, self.synth.get_samples(20000))
+        audio = fluidsynth.raw_audio_string(s)
         self.stream.write(audio)
 
 
@@ -121,7 +125,7 @@ if __name__ == "__main__":
     
     # time.sleep(1)
 
-# fl.noteon(0, 60, 30) 
+# fl.noteon(0, 60, 30)  
 # fl.noteon(0, 67, 30)
 # fl.noteon(0, 76, 30)
 
