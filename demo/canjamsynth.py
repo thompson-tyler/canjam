@@ -17,9 +17,7 @@ import wave
 # key: the literal note. Middle C, for example, is 48. 
 # velocity: how hard the note is pressed. Higher = louder. 
 
-# class Note:
-#     def __init__(self, key) -> None:
-#         pass
+
 DEFAULT_SAMPLE_RATE = 44100
 START_CHANNEL = 0 # TODO this will change with initialization from game
 DEFAULT_VELOCITY = 30
@@ -37,7 +35,7 @@ class CanJamSynth:
         self.MAX_CHANNELS = MAX_SYNTH_CHANNELS
         self.pa = pyaudio.PyAudio()
         self.synth = fluidsynth.Synth() 
-        self.sfs = ["example.sf2"] # TODO load this in from a file 
+        self.sfs = ["example.sf2"] # TODO load this in from a file of soundfonts
         
         self.stream = self.pa.open(
                         format = pyaudio.paInt16,
@@ -46,7 +44,7 @@ class CanJamSynth:
                         output = True)
         self.current_channel = start_channel
         self.current_velocity = DEFAULT_VELOCITY
-        self.bindings = {"D" : 60} # TODO load this in from a file
+        self.bindings = {"D" : 60} # TODO load this in from a bindings dict
         self.load_all_sfs()
 
     def __del__(self):
@@ -73,6 +71,7 @@ class CanJamSynth:
         s = numpy.append(s, self.synth.get_samples(20000))
         audio = fluidsynth.raw_audio_string(s)
         self.stream.write(audio)
+
 
 
 def main():
