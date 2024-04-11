@@ -8,6 +8,9 @@ import numpy
 import pyaudio
 import fluidsynth
 import wave 
+import music_encodings # translates midi numbers onto notes 
+
+print(music_encodings.note_to_number("E", 0))
 
 # NOTE ENCODING: (channel, key, velocity)
 
