@@ -7,11 +7,11 @@ from number_midi import NOTES, note_to_number
 import pygame as pg
 
 # Define constants
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-GRID_SIZE = 12  # Assuming a 12x12 grid for 132 notes
-GRID_MARGIN = 5
+GRID_SIZE = 9
 GRID_SQUARE_SIZE = 50
+GRID_MARGIN = 5
+SCREEN_HEIGHT = (GRID_SQUARE_SIZE + GRID_MARGIN) * GRID_SIZE
+SCREEN_WIDTH  = (GRID_SQUARE_SIZE + GRID_MARGIN) * GRID_SIZE
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GRAY = (200, 200, 200)
@@ -22,9 +22,10 @@ CURRENT_NOTE = 0
 #constatns for the synth 
 STARTCHANNEL = 0 
 
+
 # Function to get note index from row and column
 def get_note_index(row, col):
-    return row * GRID_SIZE + col
+    return (row * GRID_SIZE + col) + 11
 
 # Function to draw the grid
 def draw_grid(colors, game_obj, screen):
@@ -45,8 +46,9 @@ def main():
 
     # Initialize the screen
     screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pg.display.set_caption("Note Grid")
+    pg.display.set_caption("CanJam")
 
+    screen.fill(WHITE)
     # Initialize grid colors
     grid_colors = [[GRAY for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
     clicked_squares = set()  # Set to keep track of currently clicked squares
@@ -55,7 +57,6 @@ def main():
     gameSynth = CanJamSynth()
   
     running = True
-    held = False 
 
     def note_on_and_red(row, col):
         grid_colors[row][col] = RED  

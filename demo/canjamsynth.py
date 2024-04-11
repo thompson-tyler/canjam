@@ -52,6 +52,7 @@ class CanJamSynth:
 
     def __del__(self):
         self.pa.close(self.stream)
+        self.pa.terminate()
     
     def load_all_sfs(self):
         for i, sf in enumerate(self.sfs):
@@ -69,9 +70,9 @@ class CanJamSynth:
     def play_note(self, noteval: int):
         s = []
         self.synth.noteon(self.current_channel, noteval, self.current_velocity)
-        s = numpy.append(s, self.synth.get_samples(1))
-        # self.synth.noteoff(self.current_channel, noteval)
         s = numpy.append(s, self.synth.get_samples(2000))
+        self.synth.noteoff(self.current_channel, noteval)
+        s = numpy.append(s, self.synth.get_samples(1))
         audio = fluidsynth.raw_audio_string(s)
         self.stream.write(audio)
 
