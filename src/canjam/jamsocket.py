@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from socket import AF_INET, SOCK_DGRAM, socket
-from threading import Thread, Semaphore, Lock, Condition
+from threading import Thread, Semaphore, Lock
 from time import time
 from pickle import dumps, loads
 from random import random
@@ -15,26 +15,6 @@ MAX_RESENDS = 50
 address = tuple[str, int]
 
 uuid = int
-
-
-"""
-fresh on both sides:
-    - send hello, wait for hello_ack
-    - both parties store (addr, id) in connections, and 0'd seq counters
-other client has restarted:
-    - other client receives a packet with an unknown id
-    - they send a hello to try to recover, hoping for a hello_ack back to reset the connection
-    - if we get a hello, we should reset the connection related to the source address
-    - if we get a hello_ack, we should reset the connection related to the source address
-we have restarted:
-    - we send a hello to a client who knows about a previous connection from our address
-    - they should reset the connection related to our address and send a hello_ack back
-    - we should reset the connection related to their address on a hello_ack
-we get a hello from an id we know about:
-    - must be a duplicate hello, send a hello_ack with our id back
-we get a hello_ack from an id we know about:
-    - they must have gotten a duplicate hello, do nothing
-"""
 
 
 @dataclass
