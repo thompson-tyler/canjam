@@ -20,12 +20,12 @@ import wave
 
 DEFAULT_SAMPLE_RATE = 44100
 START_CHANNEL = 0 # TODO this will change with initialization from game
-DEFAULT_VELOCITY = 30
+DEFAULT_VELOCITY = 100
 DEFAULT_SYS_AUDIO_CHANNELS= 2
 MAX_SYNTH_CHANNELS = 5
 
 class CanJamSynth:
-    def __init__(self, start_channel) -> None:
+    def __init__(self, start_channel= START_CHANNEL) -> None:
         """
         CanJanSynth: creates a synth, with defined presets
         note: If you have fewer than 2 channels on your computer this will need
@@ -66,9 +66,9 @@ class CanJamSynth:
     def play_note(self, noteval: int):
         s = []
         self.synth.noteon(self.current_channel, noteval, self.current_velocity)
-        s = numpy.append(s, self.synth.get_samples(self.SAMPLE_RATE * 1))
-        self.synth.noteoff(self.current_channel, noteval)
-        s = numpy.append(s, self.synth.get_samples(20000))
+        s = numpy.append(s, self.synth.get_samples(1))
+        # self.synth.noteoff(self.current_channel, noteval)
+        s = numpy.append(s, self.synth.get_samples(2000))
         audio = fluidsynth.raw_audio_string(s)
         self.stream.write(audio)
 
