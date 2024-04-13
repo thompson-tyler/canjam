@@ -185,7 +185,7 @@ class Jamsocket:
                 timeout = max(oldest_sent + ACK_TIMEOUT - now, 0)
                 self.__sock.settimeout(timeout)
             else:
-                self.__sock.settimeout(ACK_TIMEOUT)
+                self.__sock.settimeout(None)
 
             # Receive a packet
             try:
