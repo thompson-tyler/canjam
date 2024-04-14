@@ -1,10 +1,13 @@
 from pickle import dumps, loads
 from socket import AF_INET, SOCK_DGRAM
 import unittest
-from badsocket import badsocket
-from jamsocket import Jamsocket
-from message import *
 from threading import Thread
+
+from canjam.badsocket import badsocket
+from canjam.jamsocket import Jamsocket
+from canjam.message import Message, RspUserList
+from canjam.user import User
+
 
 LOCALHOST = "127.0.0.1"
 PORT1 = 1024
@@ -21,9 +24,10 @@ class CustomSocketTest(unittest.TestCase):
 
     def test_badsocket_sendto_return_value(self):
         """Make sure badsocket.sendto returns the length of the data sent."""
-        with badsocket(AF_INET, SOCK_DGRAM) as sock1, badsocket(
-            AF_INET, SOCK_DGRAM
-        ) as sock2:
+        with (
+            badsocket(AF_INET, SOCK_DGRAM) as sock1,
+            badsocket(AF_INET, SOCK_DGRAM) as sock2,
+        ):
             sock1.bind((LOCALHOST, PORT1))
             data = b"Hello, World!"
             length = sock2.sendto(data, (LOCALHOST, PORT1))
@@ -55,9 +59,10 @@ class CustomSocketTest(unittest.TestCase):
         """
         Test jamsocket with badsocket, which should work but with some packets lost
         """
-        with Jamsocket(PORT1, badsocket) as sock1, Jamsocket(
-            PORT2, badsocket
-        ) as sock2:
+        with (
+            Jamsocket(PORT1, badsocket) as sock1,
+            Jamsocket(PORT2, badsocket) as sock2,
+        ):
             sock2.connect((LOCALHOST, PORT1))
             data = b"Hello, World!"
             size = sock2.sendto_reliably(data, (LOCALHOST, PORT1))
@@ -70,9 +75,10 @@ class CustomSocketTest(unittest.TestCase):
         Test that sending many packets over a jamsocket with an unreliable
         underlying socket works.
         """
-        with Jamsocket(PORT1, badsocket) as sock1, Jamsocket(
-            PORT2, badsocket
-        ) as sock2:
+        with (
+            Jamsocket(PORT1, badsocket) as sock1,
+            Jamsocket(PORT2, badsocket) as sock2,
+        ):
             for i in range(50):
                 sock1.connect((LOCALHOST, PORT2))
                 data = f"Hello, World! {i}".encode()
@@ -115,9 +121,10 @@ class CustomSocketTest(unittest.TestCase):
             size = sock.sendto_reliably(data, (LOCALHOST, PORT1))
             self.assertEqual(size, len(data))
 
-        with Jamsocket(PORT1, badsocket) as dest_sock, Jamsocket(
-            PORT2, badsocket
-        ) as sock:
+        with (
+            Jamsocket(PORT1, badsocket) as dest_sock,
+            Jamsocket(PORT2, badsocket) as sock,
+        ):
             sock.connect((LOCALHOST, PORT1))
             threads = []
             for i in range(I_RANGE):
@@ -195,6 +202,36 @@ class CustomSocketTest(unittest.TestCase):
 
             for sock in sockets:
                 sock.close()
+
+    def test_sending_messages(self):
+        """
+        Tests sending serialized message objects over a jamsocket
+        """
+
+        with (
+            Jamsocket(PORT1, badsocket) as dest_sock,
+            Jamsocket(PORT2, badsocket) as sock,
+        ):
+            m = RspUserList([User("Alice", 1), User("Bob", 2)])
+            data = m.serialize()
+
+            sock.connect((LOCALHOST, PORT1))
+            size = sock.sendto_reliably(data, (LOCALHOST, PORT1))
+            self.assertEqual(size, len(data))
+            rec_data = dest_sock.recv()
+            rec_m = Message.deserialize(rec_data)
+            match rec_m:
+                case RspUserList(user_list):
+                    self.assertIsInstance(user_list, list)
+                    self.assertEqual(len(user_list), 2)
+                    self.assertIsInstance(user_list[0], User)
+                    self.assertIsInstance(user_list[1], User)
+                    self.assertEqual(user_list[0].name, "Alice")
+                    self.assertEqual(user_list[0].address, 1)
+                    self.assertEqual(user_list[1].name, "Bob")
+                    self.assertEqual(user_list[1].address, 2)
+                case _:
+                    self.fail("Deserialized message is not of the correct type")
 
 
 if __name__ == "__main__":

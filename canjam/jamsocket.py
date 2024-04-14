@@ -5,6 +5,7 @@ from time import time
 from pickle import dumps, loads
 from random import random
 
+
 # The amount of time jamsocket will wait for an ack before resending a packet, in seconds
 ACK_TIMEOUT = 0.1
 
