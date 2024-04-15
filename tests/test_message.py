@@ -1,3 +1,4 @@
+from pickle import dumps
 import unittest
 
 from canjam.message import (
@@ -77,6 +78,16 @@ class MessageSerializationTest(unittest.TestCase):
 
         with self.assertRaises(Exception):
             Message.deserialize(b"bad data")
+
+    def test_deserialize_other_object(self):
+        """
+        Tests deserialization of an object that is not a Message and ensure
+        that an exception is raised
+        """
+
+        data = dumps("not a message")
+        with self.assertRaises(Exception):
+            Message.deserialize(data)
 
 
 if __name__ == "__main__":

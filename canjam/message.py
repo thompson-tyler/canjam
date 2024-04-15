@@ -10,7 +10,10 @@ class Message:
 
     @staticmethod
     def deserialize(message: bytes) -> "Message":
-        return loads(message)
+        m = loads(message)
+        if not isinstance(m, Message):
+            raise ValueError("Deserialized object is not a Message")
+        return m
 
 
 @dataclass
