@@ -4,6 +4,7 @@ from threading import Thread, Semaphore, Lock
 from time import time
 from pickle import dumps, loads
 from random import random
+from queue import Queue
 
 
 # The amount of time jamsocket will wait for an ack before resending a packet, in seconds
@@ -131,7 +132,7 @@ class Jamsocket:
     # As the inbox worker receives new data packets, it adds them here for
     # readers to pick up. Each item in the list is a tuple of the data and the
     # source address
-    __inbox: list[tuple[bytes, address]]
+    __inbox: Queue[tuple[bytes, address]]
     # A semaphore that readers can wait on to be notified when a new packet is
     # available in the inbox
     __inbox_has_item: Semaphore
@@ -143,7 +144,7 @@ class Jamsocket:
     def __init__(self, port: int, socket_type: type[socket] = socket):
         self.__sock = socket_type(AF_INET, SOCK_DGRAM)
         self.__needs_ack = []
-        self.__inbox = []
+        self.__inbox = Queue()
         self.__inbox_has_item = Semaphore(0)
         self.__inbox_worker_thread = Thread(target=self.__inbox_worker)
         self.__connections = []
@@ -223,13 +224,13 @@ class Jamsocket:
                 # If the packet is the next expected packet, add it to the
                 # inbox and increment the expected sequence number
                 if seq == conn.expected_seq:
-                    self.__inbox.append((data, from_address))
+                    self.__inbox.put((data, from_address))
                     self.__inbox_has_item.release()
                     conn.expected_seq += 1
             case DataNoAck(data):
                 # Add the packet to the inbox. No ack is needed for this packet
                 # type
-                self.__inbox.append((data, from_address))
+                self.__inbox.put((data, from_address))
                 self.__inbox_has_item.release()
             case Skip():
                 pass
@@ -413,7 +414,7 @@ class Jamsocket:
         success = self.__inbox_has_item.acquire(timeout=timeout)
         if not success:
             raise TimeoutError
-        return self.__inbox.pop(0)
+        return self.__inbox.get()
 
     def recv(self, timeout: float | None = None):
         """

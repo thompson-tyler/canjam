@@ -46,6 +46,7 @@ class CustomSocketTest(unittest.TestCase):
     def test_jamsocket_regular_socket(self):
         """
         Test jamsocket with default (regular) socket, which should work reliably because we're sending packets to ourselves
+        As a bonus, this tests the unreliable sendto method
         """
         with Jamsocket(PORT1) as sock1, Jamsocket(PORT2) as sock2:
             sock2.connect((LOCALHOST, PORT1))
