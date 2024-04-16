@@ -39,3 +39,8 @@ class NewUser(Message):
 @dataclass
 class DelUser(Message):
     user: User
+
+
+@dataclass
+class Die(Message):
+    pass
