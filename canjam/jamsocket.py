@@ -404,6 +404,13 @@ class Jamsocket:
         out_packet.ack_received.acquire()
         return len(out_packet.data)
 
+    def sendto_self(self, data: bytes):
+        """
+        Sends data to the local host. Returns the length of the data that was
+        sent.
+        """
+        return self.sendto_unreliably(data, self.__sock.getsockname())
+
     def recvfrom(self, timeout: float | None = None):
         """
         Blocks until a datagram is available in the buffer, then returns the
