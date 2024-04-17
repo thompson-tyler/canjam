@@ -1,11 +1,10 @@
 # program to display a notes grid with corresponding notes displayed
 # that then plays the notes on keypress to the specified grid area 
 
-from canjamsynth import CanJamSynth
-from number_midi import NOTES, note_to_number
+from canjam_game.canjamsynth import CanJamSynth
 
 
-import canjam.demo.pygame_trials.button as button
+from canjam_game.button import button
 import pygame as pg
 
 # Define constants

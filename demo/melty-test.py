@@ -1,4 +1,4 @@
-import meltysynth as ms
+import canjam_game.meltysynth as ms
 import pyaudio
 
 SAMPLE_RATE = 44100
