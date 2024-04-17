@@ -15,18 +15,18 @@ LOCAL_ADDRESS = ("localhost", PORT1)
 class InboundWorkerTestCase(unittest.TestCase):
     def test_start_stop(self):
         sock = Jamsocket(PORT1)
-        inQueue = Queue()
-        userList = []
-        worker = InboundWorker(sock, inQueue, userList)
+        in_queue = Queue()
+        user_list = []
+        worker = InboundWorker(sock, in_queue, user_list)
         worker.start()
         worker.stop()
         sock.close()
 
     def test_with_block(self):
-        inQueue = Queue()
-        userList = []
+        in_queue = Queue()
+        user_list = []
         with Jamsocket(PORT1) as sock, InboundWorker(
-            sock, inQueue, userList
+            sock, in_queue, user_list
         ) as _:
             pass
 
@@ -39,7 +39,7 @@ class InboundWorkerTestCase(unittest.TestCase):
             sound = Sound(1)
             sock.connect(LOCAL_ADDRESS)
             sock.sendto_reliably(sound.serialize(), LOCAL_ADDRESS)
-            queue = worker.inQueue
+            queue = worker.in_queue
             message = queue.get()
             self.assertIsInstance(message, Sound)
             self.assertEqual(message.sound, 1)
@@ -48,7 +48,7 @@ class InboundWorkerTestCase(unittest.TestCase):
         with Jamsocket(PORT1) as sock1, InboundWorker(
             sock1
         ) as worker, Jamsocket(PORT2) as sock2:
-            worker.userList.append(User("name", ("localhost", PORT2)))
+            worker.user_list.append(User("name", ("localhost", PORT2)))
 
             sock2.connect(LOCAL_ADDRESS)
             assert sock2.sendto_reliably(
@@ -59,4 +59,4 @@ class InboundWorkerTestCase(unittest.TestCase):
             message = Message.deserialize(rsp)
 
             self.assertIsInstance(message, RspUserList)
-            self.assertEqual(message.user_list, worker.userList)
+            self.assertEqual(message.user_list, worker.user_list)

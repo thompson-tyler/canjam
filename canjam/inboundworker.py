@@ -23,19 +23,19 @@ class InboundWorker:
     """
 
     sock: Jamsocket
-    inQueue: Queue[Message]
-    userList: list[User]
+    in_queue: Queue[Message]
+    user_list: list[User]
     __worker_thread: Thread
 
     def __init__(
         self,
         sock: Jamsocket,
-        inQueue: Queue[Message] = Queue(),
-        userList: list[User] = [],
+        in_queue: Queue[Message] = Queue(),
+        user_list: list[User] = [],
     ):
         self.sock = sock
-        self.inQueue = inQueue
-        self.userList = userList
+        self.in_queue = in_queue
+        self.user_list = user_list
         self.__worker_thread = Thread(target=self.__worker_job)
 
     def __enter__(self):
@@ -55,19 +55,19 @@ class InboundWorker:
                 continue
             match message:
                 case ReqUserList():
-                    rsp = RspUserList(self.userList)
+                    rsp = RspUserList(self.user_list)
                     # TODO: handle this error case... remove user if they don't respond to the message?
                     assert self.sock.sendto_reliably(rsp.serialize(), address)
                 case RspUserList(user_list):
-                    existing = set(self.userList)
+                    existing = set(self.user_list)
                     new = set(user_list)
-                    self.userList.extend(new - existing)
+                    self.user_list.extend(new - existing)
                 case NewUser(user):
-                    self.userList.append(user)
+                    self.user_list.append(user)
                 case DelUser(user):
-                    self.userList.remove(user)
+                    self.user_list.remove(user)
                 case Sound(sound):
-                    self.inQueue.put(message)
+                    self.in_queue.put(message)
                 case Die():
                     break
                 case _:
