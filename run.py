@@ -19,6 +19,11 @@ from canjam.logger import vprint, set_verbose
 
 
 def build_parser():
+    """
+    Builds and returns an ArgumentParser object that can be used to parse
+    command line arguments for the Canjam program.
+    """
+
     parser = ArgumentParser()
     parser.add_argument(
         "--name",
@@ -52,6 +57,12 @@ def build_parser():
 
 
 def parse_address(address: str) -> address:
+    """
+    From a string of the format HOST:PORT where PORT is a valid integer, returns
+    a tuple of the host and port as a string and integer, respectively. If the
+    string is not in the correct format, a ValueError will be raised.
+    """
+
     parts = address.split(":")
     if len(parts) != 2:
         raise ValueError("Address must be in the format HOST:PORT")
@@ -63,9 +74,12 @@ def parse_address(address: str) -> address:
     return host, port
 
 
-def request_user_list(addr: address, sock: Jamsocket):
+def request_user_list(addr: address, sock: Jamsocket, timeout=5):
     """
-    Requests a room's user list from a peer at the specified address.
+    Requests a room's user list from a peer at the specified address. A new
+    socket connection will be made with the peer. If the peer does not respond
+    with the user list with the specified timeout, a TimeoutError will be
+    raised
     """
 
     # Try to acquire the user list from the specified address
@@ -73,10 +87,10 @@ def request_user_list(addr: address, sock: Jamsocket):
         sock.connect(addr)
         assert sock.sendto_reliably(ReqUserList().serialize(), addr)
     except:
-        raise ConnectionError(f"Failed to reach peer at {addr}")
+        raise TimeoutError(f"Failed to reach peer at {addr}")
 
     # Wait for the proper response
-    too_late = time() + 5
+    too_late = time() + timeout
     while time() < too_late:
         message, from_addr = sock.recvfrom(too_late - time())
         match Message.deserialize(message):
@@ -103,16 +117,18 @@ def main():
     set_verbose(args.verbose)
 
     my_name: str = args.name
+    # If a port was not specified, default to 0 which will allow the OS to
+    # auto-assign a port
     port: int = args.port or 0
-    my_addr = get_my_addr() or "0.0.0.0"
+    my_addr = get_my_addr()
     user_list: list[User] = []
     in_queue: Queue[Message] = Queue()
     out_queue: Queue[tuple[Message, address]] = Queue()
-    with Jamsocket(my_addr, port) as sock:
+    with Jamsocket(port) as sock:
         # If a join address was specified, get the user list from that address
         if args.join:
             peer_addr = parse_address(args.join)
-            vprint(f"Joining room from {peer_addr}")
+            vprint(f"Joining room from peer at {peer_addr}")
             user_list = request_user_list(peer_addr, sock)
             new_user_message = NewUser(my_name)
             for user in user_list:
@@ -125,7 +141,7 @@ def main():
             vprint("Connected to", user.address)
 
         print("You're reachable at:")
-        print(f"\t{sock.getsockname()[0]}:{sock.getsockname()[1]}")
+        print(f"\t{my_addr}:{sock.getsockname()[1]}")
 
         with (
             InboundWorker(sock, my_name, in_queue, user_list) as inbound_worker,

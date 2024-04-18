@@ -143,7 +143,6 @@ class Jamsocket:
 
     def __init__(
         self,
-        bind_ip: str,
         port: int,
         socket_type: type[socket] = socket,
     ):
@@ -156,7 +155,8 @@ class Jamsocket:
         self.__connections_lock = Lock()
 
         try:
-            self.__sock.bind((bind_ip, port))
+            # Binding to 0.0.0.0 allows us to receive packets from any address
+            self.__sock.bind(("0.0.0.0", port))
         except PermissionError:
             raise PermissionError(
                 f"Permission denied to bind to port {port}. Try running the "
