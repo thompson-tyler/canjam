@@ -12,6 +12,7 @@ from canjam.message import (
     Die,
 )
 from canjam.user import User
+from canjam.logger import vprint
 
 
 class InboundWorker:
@@ -23,6 +24,7 @@ class InboundWorker:
     """
 
     sock: Jamsocket
+    name: str
     in_queue: Queue[Message]
     user_list: list[User]
     __worker_thread: Thread
@@ -30,10 +32,12 @@ class InboundWorker:
     def __init__(
         self,
         sock: Jamsocket,
+        name: str,
         in_queue: Queue[Message] = Queue(),
         user_list: list[User] = [],
     ):
         self.sock = sock
+        self.name = name
         self.in_queue = in_queue
         self.user_list = user_list
         self.__worker_thread = Thread(target=self.__worker_job)
@@ -55,18 +59,27 @@ class InboundWorker:
                 continue
             match message:
                 case ReqUserList():
-                    rsp = RspUserList(self.user_list)
+                    vprint("Received user list request from", address)
+                    rsp = RspUserList(self.name, self.user_list)
                     # TODO: handle this error case... remove user if they don't respond to the message?
                     assert self.sock.sendto_reliably(rsp.serialize(), address)
-                case RspUserList(user_list):
+                case RspUserList(peer_name, user_list):
+                    vprint("Received user list response from", address)
+                    user_list.append(User(peer_name, address))
                     existing = set(self.user_list)
                     new = set(user_list)
                     self.user_list.extend(new - existing)
-                case NewUser(user):
-                    self.user_list.append(user)
-                case DelUser(user):
-                    self.user_list.remove(user)
+                case NewUser(name):
+                    vprint("New user", name, "from", address)
+                    new_user = User(name, address)
+                    self.user_list.append(new_user)
+                case DelUser(name):
+                    vprint("User", name, "left the room")
+                    self.user_list[:] = [
+                        u for u in self.user_list if u.name != name
+                    ]
                 case Sound(sound):
+                    vprint("Received sound", sound, "from", address)
                     self.in_queue.put(message)
                 case Die():
                     break

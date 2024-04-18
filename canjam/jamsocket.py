@@ -141,7 +141,12 @@ class Jamsocket:
     __connections: list[Connection]
     __connections_lock: Lock
 
-    def __init__(self, port: int, socket_type: type[socket] = socket):
+    def __init__(
+        self,
+        bind_ip: str,
+        port: int,
+        socket_type: type[socket] = socket,
+    ):
         self.__sock = socket_type(AF_INET, SOCK_DGRAM)
         self.__needs_ack = []
         self.__inbox = Queue()
@@ -150,7 +155,13 @@ class Jamsocket:
         self.__connections = []
         self.__connections_lock = Lock()
 
-        self.__sock.bind(("localhost", port))
+        try:
+            self.__sock.bind((bind_ip, port))
+        except PermissionError:
+            raise PermissionError(
+                f"Permission denied to bind to port {port}. Try running the "
+                + "program as an administrator or using a different port."
+            )
         self.__inbox_worker_thread.start()
 
     def __enter__(self):
@@ -431,3 +442,9 @@ class Jamsocket:
         """
         data, _ = self.recvfrom(timeout)
         return data
+
+    def getsockname(self):
+        """
+        Returns the address of the socket.
+        """
+        return self.__sock.getsockname()
