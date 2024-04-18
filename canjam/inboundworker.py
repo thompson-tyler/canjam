@@ -33,9 +33,13 @@ class InboundWorker:
         self,
         sock: Jamsocket,
         name: str,
-        in_queue: Queue[Message] = Queue(),
-        user_list: list[User] = [],
+        in_queue: Queue[Message] = None,
+        user_list: list[User] = None,
     ):
+        if in_queue is None:
+            in_queue = Queue()
+        if user_list is None:
+            user_list = []
         self.sock = sock
         self.name = name
         self.in_queue = in_queue
