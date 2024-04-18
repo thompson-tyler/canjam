@@ -74,7 +74,9 @@ class InboundWorker:
                 case DelUser(name):
                     vprint("User", name, "left the room")
                     self.user_list[:] = [
-                        u for u in self.user_list if u.name != name
+                        u
+                        for u in self.user_list
+                        if u.name != name or u.address != address
                     ]
                 case Sound(sound):
                     vprint("Received sound", sound, "from", address)
