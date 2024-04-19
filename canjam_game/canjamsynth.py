@@ -27,12 +27,17 @@ DEFAULT_VELOCITY = 100
 DEFAULT_SYS_AUDIO_CHANNELS= 2
 MAX_SYNTH_CHANNELS = 5
 
+#fonting has to be a list, default is a singleton_list
+DEFAULT_FONT = ["sound_fonts/NES_Drums___SFX.sf2"]
+
 class CanJamSynth:
-    def __init__(self, start_channel= START_CHANNEL ) -> None:
+    def __init__(self, start_channel= START_CHANNEL, font = DEFAULT_FONT ) -> None:
         """
         CanJanSynth: creates a synth, with defined presets
-        note: If you have fewer than 2 channels on your computer this will need
-        to be changed.
+        start_channel: default is 2 if your device has less than two you may 
+                       need to refactor 
+        font optional: a list of soundfonts formated ["soundfont1.sf2","soundfont2.sf2"]
+              default font is font =["Nokia.sf2"]
         """
         self.SAMPLE_RATE = DEFAULT_SAMPLE_RATE
         self.MAX_CHANNELS = MAX_SYNTH_CHANNELS
@@ -40,7 +45,7 @@ class CanJamSynth:
         self.synth = fluidsynth.Synth() 
         # self.sfs = ["sound_fonts/example.sf2", "sound_fonts/Nokia.sf2"] # TODO load this in from a file of soundfonts
         
-        self.sfs = ["sound_fonts/CT8MGM.sf2"]
+        self.sfs = font
         
         self.stream = self.pa.open(
                         format = pyaudio.paInt16,
