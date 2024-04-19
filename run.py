@@ -106,8 +106,12 @@ def get_my_addr():
     """
     Attempts to get your local IP address. If it fails, it will return None.
     """
-    _, _, aliases = gethostbyname_ex(gethostname())
-    return next(filter(lambda x: x != "127.0.0.1", aliases), None)
+    # gethostnameby_ex sometimes failes with an exception
+    try:
+        _, _, aliases = gethostbyname_ex(gethostname())
+        return next(filter(lambda x: x != "127.0.0.1", aliases), None)
+    except:
+        return None
 
 
 def main():
