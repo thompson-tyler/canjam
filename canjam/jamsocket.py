@@ -13,6 +13,9 @@ ACK_TIMEOUT = 0.1
 # The number of times jamsocket will resend a packet before giving up
 MAX_RESENDS = 50
 
+# Default IP to listen on
+BIND_IP = "0.0.0.0"
+
 # A handy type alias for an address tuple - a host address and a port
 address = tuple[str, int]
 
@@ -143,7 +146,6 @@ class Jamsocket:
 
     def __init__(
         self,
-        bind_ip: str,
         port: int,
         socket_type: type[socket] = socket,
     ):
@@ -156,7 +158,7 @@ class Jamsocket:
         self.__connections_lock = Lock()
 
         try:
-            self.__sock.bind((bind_ip, port))
+            self.__sock.bind((BIND_IP, port))
         except PermissionError:
             raise PermissionError(
                 f"Permission denied to bind to port {port}. Try running the "

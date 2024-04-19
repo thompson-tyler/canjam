@@ -23,23 +23,18 @@ class InboundWorker:
     stop() methods, or by using with...as syntax.
     """
 
-    sock: Jamsocket
-    name: str
-    in_queue: Queue[Message]
-    user_list: list[User]
-    __worker_thread: Thread
-
     def __init__(
         self,
         sock: Jamsocket,
         name: str,
-        in_queue: Queue[Message] = Queue(),
         user_list: list[User] = [],
+        in_queue: Queue[Message] = Queue(),
     ):
         self.sock = sock
         self.name = name
         self.in_queue = in_queue
         self.user_list = user_list
+        print(f"PRE SPAWNING THREAD {self.user_list}, from {user_list}")
         self.__worker_thread = Thread(target=self.__worker_job)
 
     def __enter__(self):
