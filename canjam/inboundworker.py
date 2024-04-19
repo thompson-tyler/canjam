@@ -27,14 +27,17 @@ class InboundWorker:
         self,
         sock: Jamsocket,
         name: str,
-        user_list: list[User] = [],
-        in_queue: Queue[Message] = Queue(),
+        in_queue: Queue[Message] = None,
+        user_list: list[User] = None,
     ):
+        if in_queue is None:
+            in_queue = Queue()
+        if user_list is None:
+            user_list = []
         self.sock = sock
         self.name = name
         self.in_queue = in_queue
         self.user_list = user_list
-        print(f"PRE SPAWNING THREAD {self.user_list}, from {user_list}")
         self.__worker_thread = Thread(target=self.__worker_job)
 
     def __enter__(self):

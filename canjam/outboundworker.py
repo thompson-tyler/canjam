@@ -18,7 +18,9 @@ class OutboundWorker:
     out_queue: Queue[tuple[Message, address]]
     __worker_thread: Thread
 
-    def __init__(self, sock: Jamsocket, out_queue: Queue[Message] = Queue()):
+    def __init__(self, sock: Jamsocket, out_queue: Queue[Message] = None):
+        if out_queue is None:
+            out_queue = Queue()
         self.sock = sock
         self.out_queue = out_queue
         self.__worker_thread = Thread(target=self.__worker_job)
