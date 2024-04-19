@@ -1,6 +1,8 @@
 # as snagged from https://gist.github.com/mike-lawrence demo to understand 
 # multiprocessing for our pygame instance
 
+# a neat little program that listens on keyboard inputs using one process
+# and displays them using pygame, this was very fun to read and understand 
 
 #import used modules
 import sys
@@ -27,7 +29,6 @@ def inputProcessLoop(queueToInputProcess,queueFromInputProcess):
 				response = event.unicode
 				response_time = now
 				queueFromInputProcess.put([response,response_time])
-				print('recieved input')
 		if not queueToInputProcess.empty():
 			from_queue = queueToInputProcess.get()
 			if from_queue == 'quit':
@@ -113,3 +114,4 @@ if __name__ == "__main__":
 			pygame.display.flip() # re renders the display 
 			flipLatency = str(time.time()-from_queue[1]) # TODO: idk what this does 
 			queueToOutputProcess.put(flipLatency)		# TODO: idk what this does maybe metrics? 
+		print("pygame waiting on input")
