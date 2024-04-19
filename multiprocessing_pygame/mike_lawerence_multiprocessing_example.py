@@ -58,17 +58,14 @@ if __name__ == "__main__":
     
     #initialize pygame
 	import pygame
+    #### PROCESS HANDLING PORTION ######
  
 	#start up the input detector in a separate process, this is a pygame input detector, but others will work probs
 	inputProcess = multiprocessing.Process(target=inputProcessLoop, args=(queueToInputProcess,queueFromInputProcess,))
 	inputProcess.start()
 
-
-    
 	#create a multiprocessing Queue object for sending messages to an output process
 	queueToOutputProcess = multiprocessing.Queue()
-    
-    #### PROCESS HANDLING PORTION ######
     
     #start up the output process in a separate process
 	outputProcess = multiprocessing.Process(target=outputProcessLoop, args=(queueToOutputProcess,))
@@ -86,6 +83,8 @@ if __name__ == "__main__":
 
 	print("hello from the pygame process! :)")
 	screen = pygame.display.set_mode((500, 500))
+ 
+	### PYGAME PORTION OF THE PROJ #####
 
 	while not done:
 		if not queueFromInputProcess.empty():
@@ -114,4 +113,4 @@ if __name__ == "__main__":
 			pygame.display.flip() # re renders the display 
 			flipLatency = str(time.time()-from_queue[1]) # TODO: idk what this does 
 			queueToOutputProcess.put(flipLatency)		# TODO: idk what this does maybe metrics? 
-		print("pygame waiting on input")
+		# print("pygame waiting on input")

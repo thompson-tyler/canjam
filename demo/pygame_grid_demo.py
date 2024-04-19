@@ -2,7 +2,6 @@
 # that then plays the notes on keypress to the specified grid area 
 
 from canjamsynth import CanJamSynth
-from number_midi import NOTES, note_to_number
 
 import pygame as pg
 
@@ -38,7 +37,27 @@ def draw_grid(colors, game_obj, screen):
                 GRID_SQUARE_SIZE,
             )
             game_obj.draw.rect(screen, colors[row][col], rect)
+            
+def note_on_and_red(row: int, col: int, grid_colors, screen, gameSynth):
+    grid_colors[row][col] = RED  
+    draw_grid(grid_colors, game_obj= pg, screen = screen)
+    pg.display.flip()
+    
+    note_index = get_note_index(row, col)
+    print("Note clicked:", note_index)
+    
+    gameSynth.play_note(note_index)
+    grid_colors[row][col] = GRAY
 
+    
+# sends a noise to other synths TODO
+def send_noise(note, synth_font='DEFAULT', outbound_queue='TODO'): 
+    print("here send noise to all members")
+    print(f"send this info note{note}, synth info {synth_font}. \n Sending to outbound queue")
+
+# recieves and plays a noise from other synths + changes the grid color TODO 
+def recieve_noise(note, synth_font="DEFAULT", inbound_queue='TODO'): 
+    print(f"recieved note {note}, synth font {synth_font}, from inbound queue\n")
 
 def main():
     # Initialize Pygame
@@ -55,21 +74,8 @@ def main():
     
     # make the synth 
     gameSynth = CanJamSynth()
-  
+    
     running = True
-
-    def note_on_and_red(row, col):
-        grid_colors[row][col] = RED  
-        draw_grid(grid_colors, game_obj= pg, screen = screen)
-        pg.display.flip()
-
-        # clicked_squares.add((row, col)) 
-        
-        note_index = get_note_index(row, col)
-        print("Note clicked:", note_index)
-        
-        gameSynth.play_note(note_index)
-        grid_colors[row][col] = GRAY
 
     while running:
         for event in pg.event.get():
@@ -84,8 +90,7 @@ def main():
                 mouse_pos = pg.mouse.get_pos()
                 col = mouse_pos[0] // (GRID_SQUARE_SIZE + GRID_MARGIN)
                 row = mouse_pos[1] // (GRID_SQUARE_SIZE + GRID_MARGIN)
-                note_on_and_red(row, col)
-                    
+                note_on_and_red(row, col, grid_colors=grid_colors, gameSynth=gameSynth, screen=screen)
             # elif event.type == pg.MOUSEBUTTONUP:
             #     held = False
             # else:
@@ -106,7 +111,9 @@ def main():
     # Quit Pygame
     pg.quit()
 
-    
+# a pygame with no screen that outputs notes to a diff channel no grid update
+
+
 if __name__ == "__main__":
     main()
     
