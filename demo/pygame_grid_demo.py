@@ -78,13 +78,13 @@ def main():
     running = True
 
     while running:
-        for event in pg.event.get():
+        
 
+        for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
                 print("quit canjam")
                 # Check if mouse click is within the grid area
-            
             if pg.mouse.get_pressed()[0]:
                 # mouse is being held                
                 mouse_pos = pg.mouse.get_pos()
@@ -97,7 +97,6 @@ def main():
                 # for square in clicked_squares:
                 #     grid_colors[square[0]][square[1]] = GRAY
                 # clicked_squares.clear() 
-
 
         # Clear the screen
         # screen.fill(WHITE)
