@@ -31,7 +31,6 @@ def game_outbound_process_handler(outputProgramQueue:multiprocessing.Queue, synt
     
     outbound_com_queue = Queue() # FROM HANDOFF 
     
-    outbound_com_queue.put('hello from outbound coms')
     
     done = False
     while not done: 
@@ -43,17 +42,16 @@ def game_outbound_process_handler(outputProgramQueue:multiprocessing.Queue, synt
                 done = True
             else: 
                 # play the outbound noise from the synth
-                (row, col) = from_queue.get("note") 
+                (row, col) = from_queue.get('note')
                 note = get_note_index(row,col)
-                for i in range(1,2):
-                    player_synth.play_note(note)
+                player_synth.play_note(note)
                 outbound_com_queue.put(from_queue)
                 print(f"sent {from_queue} to outbound worker")
 
 
 # TODO THIS IS THE CRUX OF SYNCHRONIZATION 
 ##  TODO: Also have to figure out how to kill this since only monitoroing the inboudn communications 
-def game_inbound_process_handler(inboundProcessQueue:multiprocessing.Queue, inbound_com_process: Queue):
+def game_inbound_process_handler(inboundProcessQueue:multiprocessing.Queue):
     """ Takes NCS messages form the inbound_com_process, 
         1. while true plays a noise from the inbound_com_queue
         2. and then sends it to the inboundProcessQueue to update the color
@@ -64,26 +62,48 @@ def game_inbound_process_handler(inboundProcessQueue:multiprocessing.Queue, inbo
     
     inbound_com_process = Queue() # FROM HANDOFF
 
-    inbound_com_process.put(' from inbound ')
+    
+    synth = CanJamSynth(font='drums')
+    INBOUND_SYNTH = 'drums'
+    my_color = (0, 0 , 0)
+    
+    curr_ncs = {
+        'note': (4,3), 
+        'color': my_color,
+        'synth': INBOUND_SYNTH
+    }
 
+    # for all the games and all the synths make a synth dictionary for each 
+    
+    # make_neighbor_synths(neighborslist, synthslist) # HANDOFF 
+    # for _ in range(1, 20):
+    #     inbound_com_process.put(curr_ncs) # demo puts thigns on the outbound 
+    #     queue to play 
+    
+    
+    # TODO: get a simulation of multiple requests 
     
     done = False
     while not done: 
+        
         if not inbound_com_process.empty(): 
             from_queue = inbound_com_process.get()
+            print(f"from queue is {from_queue}\n")
             if from_queue == "quit": 
                 print("signal inbound processer to quit")
                 done = True
             else:
                 print(f"got noise sent from inbound queue {from_queue}")
                 # put the color on the inboundProcess queue for the program to 
-                # use 
+    
+                (row,col) = from_queue.get('note')
+                note = get_note_index(row,col)
+                synth.play_note(note)
                 inboundProcessQueue.put(from_queue)
-                
+   
+        inbound_com_process.put(curr_ncs)
                 # play the noise 
             
-
-
 
 # pygame display functions TODO: maybe inline this 
 def get_note_index(row:int, col:int) -> int:
@@ -130,7 +150,7 @@ def note_color_on(row:int, col:int, color, grid_colors, screen):
     grid_colors[row][col] = color 
     draw_grid(grid_colors, game_obj=pygame, screen=screen)
     pygame.display.flip()
-    sleep(.05)
+    sleep(.09)
     grid_colors[row][col] = GRAY
     
 
@@ -199,11 +219,16 @@ if __name__ == "__main__":
         """
 
         # ALTERNATE CHECK TO SEE IF WE CARE ABOUT LOOP  
-        if queue_check_counter > SWITCH_COUNT: 
+        if queue_check_counter > 2: 
             if not queueFromInputProcess.empty(): 
                 note_col_loc = queueFromInputProcess.get()
-                print(f"display {note_col_loc}")
-            queue_check_counter == -SWITCH_COUNT
+                (row,col,)= note_col_loc.get('note')
+                color = note_col_loc.get('color')
+                note_color_on(row, col, color = color, grid_colors= grid_colors, screen=screen)
+                
+            queue_check_counter == -2
+        
+        queue_check_counter += 1
             
         for event in pygame.event.get(): 
             if event.type == pygame.KEYDOWN :
@@ -219,11 +244,7 @@ if __name__ == "__main__":
             col = mouse_pos[0] // (GRID_SQUARE_SIZE + GRID_MARGIN)
             row = mouse_pos[1] // (GRID_SQUARE_SIZE + GRID_MARGIN)
             # and send it to the outbound queue 
-            curr_ncs = {
-                "note": (row,col), 
-                "color": PLAYER_COLOR, 
-                "synth": PLAYER_SYNTH
-            }
+            curr_ncs = {'note': (row,col), 'color': PLAYER_COLOR, 'synth': PLAYER_SYNTH}
             queuefromOutputProcess.put(curr_ncs)
             note_color_on(row,col, color = PLAYER_COLOR, grid_colors=grid_colors,
                           screen=screen)
@@ -232,7 +253,6 @@ if __name__ == "__main__":
         
         pygame.display.flip()
 
-        queue_check_counter += 1
     
     pygame.quit()
            
