@@ -29,7 +29,7 @@ MAX_SYNTH_CHANNELS = 5
 # dictionary of soundfonts 
 
 instruments = {
-    "piano": ['example.sf2'],
+    "piano": ['example.sf2'], 
     "drums": ['drums.sf2']
 }
 
@@ -44,7 +44,7 @@ class CanJamSynth:
         self.MAX_CHANNELS = MAX_SYNTH_CHANNELS 
         self.pa = pyaudio.PyAudio()
         self.synth = fluidsynth.Synth() 
-        self.sfs = ['exaple.sf2'] # TODO load this in from a file of soundfonts
+        self.sfs = instruments[font]# TODO load this in from a file of soundfonts
         
         self.stream = self.pa.open(
                         format = pyaudio.paInt16,

@@ -45,7 +45,8 @@ def game_outbound_process_handler(outputProgramQueue:multiprocessing.Queue, synt
                 # play the outbound noise from the synth
                 (row, col) = from_queue.get("note") 
                 note = get_note_index(row,col)
-                player_synth.play_note(note)
+                for i in range(1,2):
+                    player_synth.play_note(note)
                 outbound_com_queue.put(from_queue)
                 print(f"sent {from_queue} to outbound worker")
 
@@ -217,15 +218,15 @@ if __name__ == "__main__":
             mouse_pos = pygame.mouse.get_pos()
             col = mouse_pos[0] // (GRID_SQUARE_SIZE + GRID_MARGIN)
             row = mouse_pos[1] // (GRID_SQUARE_SIZE + GRID_MARGIN)
-            note_color_on(row,col, color = PLAYER_COLOR, grid_colors=grid_colors,
-                          screen=screen)
             # and send it to the outbound queue 
             curr_ncs = {
                 "note": (row,col), 
                 "color": PLAYER_COLOR, 
                 "synth": PLAYER_SYNTH
-                }
+            }
             queuefromOutputProcess.put(curr_ncs)
+            note_color_on(row,col, color = PLAYER_COLOR, grid_colors=grid_colors,
+                          screen=screen)
       
         draw_grid(grid_colors, game_obj=pygame, screen=screen)
         
