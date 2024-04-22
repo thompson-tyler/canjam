@@ -1,7 +1,8 @@
 from queue import Queue
-from time import time, sleep
+from time import time
 from socket import gethostname, gethostbyname_ex
 from argparse import Namespace
+from threading import Semaphore
 
 from canjam.jamsocket import Jamsocket, address
 from canjam.inboundworker import InboundWorker
@@ -27,21 +28,23 @@ class CanJammer:
     CanJam peer if specified.
     """
 
-    def __init__(self, args: dict):
+    def __init__(self, args: Namespace):
         """ """
-        self.name = args.name
         self.join = args.join
 
         set_verbose(args.verbose)
 
         # If a port was not specified, default to 0 which will allow the OS to
         # auto-assign a port
+        self.name = args.name
         self.port: int = args.port or 0
         self.address = CanJammer.__get_my_addr__()
 
-        self.in_queue: Queue[Message] = Queue()
-        self.out_queue: Queue[tuple[Message, address]] = Queue()
+        self.in_queue = Queue()
+        self.out_queue = Queue()
         self.user_list = []
+
+        self.notifier = Semaphore(0)
 
     def __bootstrap_connection__(self, sock: Jamsocket):
         """Set up CanJammer's user_list: if the user is joining another
@@ -84,8 +87,8 @@ class CanJammer:
         # Wait for the proper response
         too_late = time() + timeout
         while time() < too_late:
-            message, from_addr = sock.recvfrom(too_late - time())
-            match Message.deserialize(message):
+            msg, from_addr = sock.recvfrom(too_late - time())
+            match Message.deserialize(msg):
                 case RspUserList(peer_name, user_list):
                     user_list.append(User(peer_name, from_addr))
                     return user_list
@@ -121,32 +124,31 @@ class CanJammer:
     def run(self):
         """Set up connection with other CanJam peers. If the user is joining
         another CanJam user's room, set up connections to all peers.
-        On receiving [ FINISH ]
+        NOTE: CanJammer should spawn and manage GameRunner, as all non-sound
+        pack handling is done by InboundWorker and OutboundWorker. Can't
+        remember: any state changes that _need_ to notify CanJammer to do
+        work for another thread?
         """
 
         with Jamsocket(self.port) as sock:
             self.__bootstrap_connection__(sock)
 
-            # Connect to each user
-            for user in self.user_list:
-                sock.connect(user.address)
-                vprint("Connected to", user.address)
-
-            with (
-                InboundWorker(
-                    sock, self.name, self.in_queue, self.user_list
-                ) as inbound_worker,
-                OutboundWorker(sock, self.out_queue) as outbound_worker,
-            ):
+            with (InboundWorker(sock, self.notifier, self.name, self.in_queue, self.user_list) as inbound_worker,
+                  OutboundWorker(sock, self.notifier, self.name, self.out_queue) as outbound_worker
+                ):
                 try:
+                    # TODO: start the GameRunner module
+
+                    # TODO: change to checking some sort of internal flag indicating what CanJammer was awoken for
                     while True:
-                        sleep(1)
-                        for user in self.user_list:
-                            self.out_queue.put((Sound(1), user.address))
+                        self.notifier.acquire()
+                        vprint(f"Awoken! User list is now {self.user_list}!")
                 except KeyboardInterrupt:
                     pass
                 finally:
+                    # Notify all connected peers that CanJam user is leaving
                     del_user = DelUser(self.name)
+
                     for user in self.user_list:
                         print("Sending", del_user, "to", user.address)
                         self.out_queue.put((del_user, user.address))

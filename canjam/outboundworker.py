@@ -1,9 +1,9 @@
 from queue import Queue
-from threading import Thread
+from threading import Thread, Semaphore
 
 from canjam.jamsocket import Jamsocket, address
 from canjam.message import Message, Sound, Die
-
+from canjam.logger import vprint
 
 class OutboundWorker:
     """
@@ -18,11 +18,19 @@ class OutboundWorker:
     out_queue: Queue[tuple[Message, address]]
     __worker_thread: Thread
 
-    def __init__(self, sock: Jamsocket, out_queue: Queue[Message] = None):
-        if out_queue is None:
-            out_queue = Queue()
+    def __init__(
+        self,
+        sock: Jamsocket,
+        notifier: Semaphore,
+        name: str,
+        out_queue: Queue[Message] = Queue(),
+    ):
         self.sock = sock
+        self.name = name
+
         self.out_queue = out_queue
+        self.notifier = notifier
+
         self.__worker_thread = Thread(target=self.__worker_job)
 
     def __enter__(self):
@@ -48,4 +56,5 @@ class OutboundWorker:
                 case Sound(_):
                     self.sock.sendto_unreliably(message.serialize(), address)
                 case _:
+                    vprint(f"Reliably sending {message}!")
                     self.sock.sendto_reliably(message.serialize(), address)

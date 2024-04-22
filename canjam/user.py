@@ -13,7 +13,7 @@ class User:
     @staticmethod
     def deserialize(data: bytes) -> "User":
         return loads(data)
-    
+
     def __hash__(self) -> int:
         return hash(self.name + str(self.address))
 

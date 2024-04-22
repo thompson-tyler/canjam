@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from pickle import dumps, loads
-
 from canjam.user import User
 
 
