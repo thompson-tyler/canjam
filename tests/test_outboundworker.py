@@ -37,9 +37,9 @@ class OutboundWorkerTestCase(unittest.TestCase):
             pass
 
     def test_sound_message(self):
-        with Jamsocket(PORT1) as sock1, Jamsocket(
-            PORT2
-        ) as sock2, OutboundWorker(sock2) as worker:
+        with Jamsocket(PORT1) as sock1, Jamsocket(PORT2) as sock2, OutboundWorker(
+            sock2
+        ) as worker:
             sock2.connect(LOCAL_ADDRESS)
             worker.out_queue.put((Sound(1), LOCAL_ADDRESS))
             data = sock1.recv()
@@ -48,9 +48,9 @@ class OutboundWorkerTestCase(unittest.TestCase):
             self.assertEqual(message.sound, 1)
 
     def test_req_user_list_message(self):
-        with Jamsocket(PORT1) as sock1, Jamsocket(
-            PORT2
-        ) as sock2, OutboundWorker(sock2) as worker:
+        with Jamsocket(PORT1) as sock1, Jamsocket(PORT2) as sock2, OutboundWorker(
+            sock2
+        ) as worker:
             sock2.connect(LOCAL_ADDRESS)
             worker.out_queue.put((ReqUserList(), LOCAL_ADDRESS))
             data = sock1.recv()
@@ -58,9 +58,9 @@ class OutboundWorkerTestCase(unittest.TestCase):
             self.assertIsInstance(message, ReqUserList)
 
     def test_rsp_user_list_message(self):
-        with Jamsocket(PORT1) as sock1, Jamsocket(
-            PORT2
-        ) as sock2, OutboundWorker(sock2) as worker:
+        with Jamsocket(PORT1) as sock1, Jamsocket(PORT2) as sock2, OutboundWorker(
+            sock2
+        ) as worker:
             sock2.connect(LOCAL_ADDRESS)
             worker.out_queue.put((RspUserList("name", []), LOCAL_ADDRESS))
             data = sock1.recv()
@@ -70,9 +70,9 @@ class OutboundWorkerTestCase(unittest.TestCase):
             self.assertEqual(message.user_list, [])
 
     def test_new_user_message(self):
-        with Jamsocket(PORT1) as sock1, Jamsocket(
-            PORT2
-        ) as sock2, OutboundWorker(sock2) as worker:
+        with Jamsocket(PORT1) as sock1, Jamsocket(PORT2) as sock2, OutboundWorker(
+            sock2
+        ) as worker:
             sock2.connect(LOCAL_ADDRESS)
             worker.out_queue.put((NewUser("name"), LOCAL_ADDRESS))
             data = sock1.recv()
@@ -81,9 +81,9 @@ class OutboundWorkerTestCase(unittest.TestCase):
             self.assertEqual(message.name, "name")
 
     def test_del_user_message(self):
-        with Jamsocket(PORT1) as sock1, Jamsocket(
-            PORT2
-        ) as sock2, OutboundWorker(sock2) as worker:
+        with Jamsocket(PORT1) as sock1, Jamsocket(PORT2) as sock2, OutboundWorker(
+            sock2
+        ) as worker:
             sock2.connect(LOCAL_ADDRESS)
             worker.out_queue.put((DelUser("name"), LOCAL_ADDRESS))
             data = sock1.recv()

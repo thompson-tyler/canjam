@@ -64,18 +64,16 @@ class InboundWorker:
                 case RspUserList(peer_name, user_list):
                     vprint("Received user list response from", address)
                     user_list.append(User(peer_name, address))
-                    existing = set(self.user_list)
-                    new = set(user_list)
-                    self.user_list.extend(new - existing)
+                    existing_list = set(self.user_list)
+                    new_list = set(user_list)
+                    self.user_list.extend(new_list - existing_list)
                 case NewUser(name):
                     vprint("New user", name, "from", address)
                     new_user = User(name, address)
                     self.user_list.append(new_user)
                 case DelUser(name):
                     vprint("User", name, "left the room")
-                    self.user_list[:] = [
-                        u for u in self.user_list if u.name != name
-                    ]
+                    self.user_list[:] = [u for u in self.user_list if u.name != name]
                 case Sound(sound):
                     vprint("Received sound", sound, "from", address)
                     self.in_queue.put(message)
