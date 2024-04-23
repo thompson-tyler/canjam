@@ -296,15 +296,11 @@ class Jamsocket:
 
     # Returns a connection object if one exists, otherwise None
     def __conn_by_id(self, id_: uuid):
-        return next(
-            (conn for conn in self.__connections if conn.id_ == id_), None
-        )
+        return next((conn for conn in self.__connections if conn.id_ == id_), None)
 
     # Returns a connection object if one exists, otherwise None
     def __conn_by_address(self, addr: address):
-        return next(
-            (conn for conn in self.__connections if conn.peer == addr), None
-        )
+        return next((conn for conn in self.__connections if conn.peer == addr), None)
 
     def __put_skip(self):
         self.__sock.sendto(dumps(Skip()), self.__sock.getsockname())
