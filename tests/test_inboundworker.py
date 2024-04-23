@@ -38,9 +38,7 @@ class InboundWorkerTestCase(unittest.TestCase):
     def test_sound_message(self):
         """Assert that InboundWorker can receive and process a Sound."""
         with Jamsocket(PORT1) as sock, InboundWorker(
-            sock, 
-            Semaphore(0),
-            "Skylar"
+            sock, Semaphore(0), "Skylar"
         ) as worker:
             sound = Sound(1)
             sock.connect(LOCAL_ADDRESS)
@@ -55,9 +53,7 @@ class InboundWorkerTestCase(unittest.TestCase):
         with a ResUserList.
         """
         with Jamsocket(PORT1) as sock1, InboundWorker(
-            sock1,
-            Semaphore(0),
-            "Skylar"
+            sock1, Semaphore(0), "Skylar"
         ) as worker, Jamsocket(PORT2) as sock2:
             tyler = User("Tyler", ("localhost", PORT2))
             skylar = User("Skylar", ("localhost", PORT2))
@@ -78,9 +74,7 @@ class InboundWorkerTestCase(unittest.TestCase):
         receiving a NewUser.
         """
         with Jamsocket(PORT1) as sock1, InboundWorker(
-            sock1,
-            Semaphore(0),
-            "Skylar"
+            sock1, Semaphore(0), "Skylar"
         ) as worker, Jamsocket(PORT2) as sock2:
             self.assertEqual(set(), worker.user_set)
 
@@ -90,7 +84,7 @@ class InboundWorkerTestCase(unittest.TestCase):
             sock2.connect(LOCAL_ADDRESS)
             cece = User("Cece", ("127.0.0.1", PORT2))
             assert sock2.sendto_reliably(NewUser("Cece").serialize(), LOCAL_ADDRESS)
-            
+
             worker.stop()
             self.assertEqual(set([tyler, cece]), worker.user_set)
 
@@ -99,9 +93,7 @@ class InboundWorkerTestCase(unittest.TestCase):
         receiving a DelUser.
         """
         with Jamsocket(PORT1) as sock1, InboundWorker(
-            sock1,
-            Semaphore(0),
-            "Skylar"
+            sock1, Semaphore(0), "Skylar"
         ) as worker, Jamsocket(PORT2) as sock2:
             tyler = User("Tyler", ("localhost", PORT2))
             cece = User("Cece", ("127.0.0.1", PORT2))

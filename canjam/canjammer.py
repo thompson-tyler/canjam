@@ -13,7 +13,6 @@ from canjam.message import (
     RspUserList,
     NewUser,
     DelUser,
-    Sound,
 )
 from canjam.user import User
 from canjam.logger import vprint, set_verbose
@@ -63,7 +62,6 @@ class CanJammer:
 
         print("You're reachable at:")
         print(f"\t{self.address}:{sock.getsockname()[1]}")
-
 
     def __request_user_set__(self, sock: Jamsocket, timeout=5) -> list[User]:
         """
@@ -132,9 +130,14 @@ class CanJammer:
         with Jamsocket(self.port) as sock:
             self.__bootstrap_connection__(sock)
 
-            with (InboundWorker(sock, self.notifier, self.name, self.in_queue, self.user_set) as inbound_worker,
-                  OutboundWorker(sock, self.notifier, self.name, self.out_queue) as outbound_worker
-                ):
+            with (
+                InboundWorker(
+                    sock, self.notifier, self.name, self.in_queue, self.user_set
+                ) as inbound_worker,
+                OutboundWorker(
+                    sock, self.notifier, self.name, self.out_queue
+                ) as outbound_worker,
+            ):
                 try:
                     # TODO: start the GameRunner module
 

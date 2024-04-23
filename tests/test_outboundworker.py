@@ -30,18 +30,20 @@ class OutboundWorkerTestCase(unittest.TestCase):
 
     def test_with_block(self):
         out_queue = Queue()
-        with Jamsocket(PORT1) as sock, OutboundWorker(sock, Semaphore(0), "Skylar", out_queue) as _:
+        with Jamsocket(PORT1) as sock, OutboundWorker(
+            sock, Semaphore(0), "Skylar", out_queue
+        ) as _:
             pass
 
     def test_with_defaults(self):
-        with Jamsocket(PORT1) as sock, OutboundWorker(sock, Semaphore(0), "Skylar") as _:
+        with Jamsocket(PORT1) as sock, OutboundWorker(
+            sock, Semaphore(0), "Skylar"
+        ) as _:
             pass
 
     def test_sound_message(self):
         with Jamsocket(PORT1) as sock1, Jamsocket(PORT2) as sock2, OutboundWorker(
-            sock2,
-            Semaphore(0),
-            "Skylar"
+            sock2, Semaphore(0), "Skylar"
         ) as worker:
             sock2.connect(LOCAL_ADDRESS)
             worker.out_queue.put((Sound(1), LOCAL_ADDRESS))
@@ -52,9 +54,7 @@ class OutboundWorkerTestCase(unittest.TestCase):
 
     def test_req_user_set_message(self):
         with Jamsocket(PORT1) as sock1, Jamsocket(PORT2) as sock2, OutboundWorker(
-            sock2,
-            Semaphore(0),
-            "Skylar"
+            sock2, Semaphore(0), "Skylar"
         ) as worker:
             sock2.connect(LOCAL_ADDRESS)
             worker.out_queue.put((ReqUserList(), LOCAL_ADDRESS))
@@ -64,9 +64,7 @@ class OutboundWorkerTestCase(unittest.TestCase):
 
     def test_rsp_user_set_message(self):
         with Jamsocket(PORT1) as sock1, Jamsocket(PORT2) as sock2, OutboundWorker(
-            sock2,
-            Semaphore(0),
-            "Skylar"
+            sock2, Semaphore(0), "Skylar"
         ) as worker:
             sock2.connect(LOCAL_ADDRESS)
             worker.out_queue.put((RspUserList("name", set()), LOCAL_ADDRESS))
@@ -78,9 +76,7 @@ class OutboundWorkerTestCase(unittest.TestCase):
 
     def test_new_user_message(self):
         with Jamsocket(PORT1) as sock1, Jamsocket(PORT2) as sock2, OutboundWorker(
-            sock2,
-            Semaphore(0),
-            "Skylar"
+            sock2, Semaphore(0), "Skylar"
         ) as worker:
             sock2.connect(LOCAL_ADDRESS)
             worker.out_queue.put((NewUser("name"), LOCAL_ADDRESS))
@@ -91,9 +87,7 @@ class OutboundWorkerTestCase(unittest.TestCase):
 
     def test_del_user_message(self):
         with Jamsocket(PORT1) as sock1, Jamsocket(PORT2) as sock2, OutboundWorker(
-            sock2,
-            Semaphore(0),
-            "Skylar"
+            sock2, Semaphore(0), "Skylar"
         ) as worker:
             sock2.connect(LOCAL_ADDRESS)
             worker.out_queue.put((DelUser("name"), LOCAL_ADDRESS))

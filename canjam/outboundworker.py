@@ -5,6 +5,7 @@ from canjam.jamsocket import Jamsocket, address
 from canjam.message import Message, Sound, Die
 from canjam.logger import vprint
 
+
 class OutboundWorker:
     """
     A multi-threaded worker that sends outgoing messages through a Jamsocket.

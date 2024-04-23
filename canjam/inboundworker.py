@@ -29,7 +29,7 @@ class InboundWorker:
         notifier: Semaphore,
         name: str,
         in_queue: Queue[Message] = Queue(),
-        user_set: set[User] = None
+        user_set: set[User] = None,
     ):
         self.sock = sock
         self.name = name
