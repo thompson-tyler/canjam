@@ -19,8 +19,8 @@ DEFAULT_SYS_AUDIO_CHANNELS = 2
 MAX_SYNTH_CHANNELS = 5
 
 class SynthType(Enum):
-    PIANO = "example.sf2"
-    DRUMS = "drums.sf2"
+    PIANO = "canjam/sound_fonts/example.sf2"
+    DRUMS = "canjam/sound_fonts/drums.sf2"
 
 class CanJamSynth:
     def __init__(self, 

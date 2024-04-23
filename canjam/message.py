@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from pickle import dumps, loads
+from enum import Enum
 
 from canjam.user import User
-
+from canjam.sound_fonts.canjamsynth import SynthType
 
 class Message:
     def serialize(self) -> bytes:
@@ -15,10 +16,24 @@ class Message:
             raise ValueError("Deserialized object is not a Message")
         return m
 
+class Color(Enum):
+    STRAWB = (249, 65, 68)
+    ORANGE = (243, 114, 44)
+    HONEY = (249, 199, 79)
+    MATCHA = (144, 190, 109)
+    MINT = (67, 170, 139)
+    BLUEB = (87, 117, 144)
+
+    WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    GRAY = (200, 200, 200)
+
 
 @dataclass
 class Sound(Message):
-    sound: int  # stub, replace with actual sound spec
+    note: int
+    color: Color
+    synth_type: SynthType
 
 
 @dataclass
@@ -28,7 +43,7 @@ class ReqUserList(Message):
 
 @dataclass
 class RspUserList(Message):
-    user_list: list[User]
+    user_list: set[User]
 
 
 @dataclass
@@ -39,3 +54,7 @@ class NewUser(Message):
 @dataclass
 class DelUser(Message):
     user: User
+
+@dataclass
+class Die(Message):
+    pass
