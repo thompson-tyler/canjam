@@ -29,13 +29,13 @@ class InboundWorker:
         notifier: Semaphore,
         name: str,
         in_queue: Queue[Message] = Queue(),
-        user_list: list[User] = [],
+        user_set: set[User] = None
     ):
         self.sock = sock
         self.name = name
 
         self.in_queue = in_queue
-        self.user_list = user_list
+        self.user_set = user_set if user_set else set()
         self.notifier = notifier
 
         self.__worker_thread = Thread(target=self.__worker_job)
@@ -58,28 +58,24 @@ class InboundWorker:
             match message:
                 case ReqUserList():
                     vprint("Received user list request from", address)
-                    rsp = RspUserList(self.name, self.user_list)
+                    rsp = RspUserList(self.name, self.user_set)
                     # TODO: handle this error case... remove user if they don't respond to the message?
                     assert self.sock.sendto_reliably(rsp.serialize(), address)
 
-                case RspUserList(peer_name, user_list):
+                case RspUserList(peer_name, new_user_set):
                     vprint("Received user list response from", address)
-                    user_list.append(User(peer_name, address))
-
-                    existing_list = set(self.user_list)
-                    new_list = set(user_list)
-                    self.user_list.extend(new_list - existing_list)
+                    new_user_set.add(User(peer_name, address))
+                    self.user_set.update(new_user_set)
                     self.notifier.release()
 
                 case NewUser(name):
                     vprint("New user", name, "from", address)
-                    new_user = User(name, address)
-                    self.user_list.append(new_user)
+                    self.user_set.add(User(name, address))
                     self.notifier.release()
 
                 case DelUser(name):
                     vprint("User", name, "left the room")
-                    self.user_list[:] = [u for u in self.user_list if u.name != name]
+                    self.user_set.remove(User(name, address))
                     self.notifier.release()
 
                 case Sound(sound):

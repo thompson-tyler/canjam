@@ -42,31 +42,30 @@ class CanJammer:
 
         self.in_queue = Queue()
         self.out_queue = Queue()
-        self.user_list = []
+        self.user_set = set()
 
         self.notifier = Semaphore(0)
 
     def __bootstrap_connection__(self, sock: Jamsocket):
-        """Set up CanJammer's user_list: if the user is joining another
-        CanJam user's room, request the other user's user_list and send
+        """Set up CanJammer's user_set: if the user is joining another
+        CanJam user's room, request the other user's user_set and send
         NewUser messages to each new peer. Then, print out the user's
         current hosting IP and port for other users to join this user.
         """
 
         if self.join:
-            self.user_list = self.__request_user_list__(sock)
+            self.user_set = self.__request_user_set__(sock)
 
             # Send NewUser message out to all new connected peers
             new_user_message = NewUser(self.name)
-            for user in self.user_list:
+            for user in self.user_set:
                 self.out_queue.put((new_user_message, user.address))
 
         print("You're reachable at:")
         print(f"\t{self.address}:{sock.getsockname()[1]}")
 
-        vprint("User list:", self.user_list)
 
-    def __request_user_list__(self, sock: Jamsocket, timeout=5) -> list[User]:
+    def __request_user_set__(self, sock: Jamsocket, timeout=5) -> list[User]:
         """
         Requests a room's user list from a peer at the specified address. A new
         socket connection will be made with the peer. If the peer does not
@@ -89,9 +88,9 @@ class CanJammer:
         while time() < too_late:
             msg, from_addr = sock.recvfrom(too_late - time())
             match Message.deserialize(msg):
-                case RspUserList(peer_name, user_list):
-                    user_list.append(User(peer_name, from_addr))
-                    return user_list
+                case RspUserList(peer_name, user_set):
+                    user_set.add(User(peer_name, from_addr))
+                    return user_set
                 case _:
                     pass
 
@@ -133,7 +132,7 @@ class CanJammer:
         with Jamsocket(self.port) as sock:
             self.__bootstrap_connection__(sock)
 
-            with (InboundWorker(sock, self.notifier, self.name, self.in_queue, self.user_list) as inbound_worker,
+            with (InboundWorker(sock, self.notifier, self.name, self.in_queue, self.user_set) as inbound_worker,
                   OutboundWorker(sock, self.notifier, self.name, self.out_queue) as outbound_worker
                 ):
                 try:
@@ -142,13 +141,13 @@ class CanJammer:
                     # TODO: change to checking some sort of internal flag indicating what CanJammer was awoken for
                     while True:
                         self.notifier.acquire()
-                        vprint(f"Awoken! User list is now {self.user_list}!")
+                        vprint(f"User list is now {self.user_set}!")
                 except KeyboardInterrupt:
                     pass
                 finally:
                     # Notify all connected peers that CanJam user is leaving
                     del_user = DelUser(self.name)
 
-                    for user in self.user_list:
+                    for user in self.user_set:
                         print("Sending", del_user, "to", user.address)
                         self.out_queue.put((del_user, user.address))
