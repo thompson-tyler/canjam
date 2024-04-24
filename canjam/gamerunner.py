@@ -43,11 +43,11 @@ class GameRunner:
         self.running = True
         self.screen_notifier = Semaphore(0)
 
-        # select a random Color and a random Synth
-        self.color = choice(PLAYER_COLORS)
-        self.synth_type = choice(list(SynthType)).value
-
-        self.player_synth = CanJamSynth(font=self.synth_type)
+        self.color = choice(PLAYER_COLORS)        
+        self.synth_type = SynthType.PIANO2
+    
+    
+        
         self.grid = [[Color.GRAY.value for _ in range(WIDTH)] for _ in range(WIDTH)]
 
     def draw_grid(self, game_obj, screen):
@@ -85,8 +85,7 @@ class GameRunner:
 
     def sound_handler(self, color_queue: Queue[Cell]):
         """ """
-        # synth = CanJamSynth(SynthType.PIANO)
-        synth2 = CanJamSynth(SynthType.MARIO)
+        synth2 = CanJamSynth(SynthType.TRUMPET)
 
         while self.running:
             match self.in_queue.get():
@@ -94,7 +93,6 @@ class GameRunner:
                     return
                 # TODO: play note with different synth from different user?
                 case Sound(note, color, synth_type):
-                    # synth.play_note(note)
                     synth2.play_note(note)
                     (row, col) = (note // WIDTH, note % WIDTH)
                     color_queue.put(Cell(color, (row, col)))
