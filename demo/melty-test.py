@@ -4,11 +4,7 @@ import pyaudio
 SAMPLE_RATE = 44100
 
 pa = pyaudio.PyAudio()
-strm = pa.open(
-    format = pyaudio.paInt16,
-    channels = 2,
-    rate = SAMPLE_RATE,
-    output = True)
+strm = pa.open(format=pyaudio.paInt16, channels=2, rate=SAMPLE_RATE, output=True)
 
 
 # Load the SoundFont.
@@ -29,4 +25,3 @@ right = ms.create_buffer(3 * settings.sample_rate)
 
 # Render the waveform.
 synthesizer.render(left, right)
-

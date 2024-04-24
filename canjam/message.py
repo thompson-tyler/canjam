@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from pickle import dumps, loads
-
 from canjam.user import User
 
 
@@ -29,7 +28,7 @@ class ReqUserList(Message):
 @dataclass
 class RspUserList(Message):
     source_name: str
-    user_list: list[User]
+    user_set: set[User]
 
 
 @dataclass
