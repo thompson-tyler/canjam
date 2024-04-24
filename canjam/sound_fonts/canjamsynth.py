@@ -24,6 +24,7 @@ class SynthType(Enum):
     MARIO = "canjam/sound_fonts/SuperMarioKart.sf2" 
     BELLS = "canjam/sound_fonts/Tubular_Carillon.sf2"
     PIANO2 =  "canjam/sound_fonts/example.sf2"
+    TOADS = "canjam/sound_fonts/battletoads.sf2"
 
 class CanJamSynth:
     def __init__(self, font:SynthType):
@@ -49,12 +50,11 @@ class CanJamSynth:
         self.curr_channel = START_CHANNEL
         self.curr_velocity = DEFAULT_VELOCITY
 
-        channel = 0
         font_path = font.value
 
         font_id = self.fluid_synth.sfload(font_path)
         # TODO: figure out what program_select does
-        self.fluid_synth.program_select(channel, font_id, 0, 0)
+        self.fluid_synth.program_select(START_CHANNEL, font_id, 0, 0)
 
     def __del__(self):
         """ """
