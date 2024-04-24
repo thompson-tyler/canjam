@@ -19,13 +19,16 @@ DEFAULT_SYS_AUDIO_CHANNELS = 2
 MAX_SYNTH_CHANNELS = 5
 
 
+#fonts again
 class SynthType(Enum):
     PIANO = "canjam/sound_fonts/example.sf2"
-    DRUMS = "canjam/sound_fonts/drums.sf2"
-
+    MARIO = "canjam/sound_fonts/SuperMarioKart.sf2" 
+    BELLS = "canjam/sound_fonts/Tubular_Carillon.sf2"
+    PIANO2 =  "canjam/sound_fonts/example.sf2"
+    TOADS = "canjam/sound_fonts/battletoads.sf2"
 
 class CanJamSynth:
-    def __init__(self, font: SynthType = SynthType.PIANO):
+    def __init__(self, font:SynthType):
         """
         Intialize a CanJamSynth with defined presets.
         note: If you have fewer than 2 channels on your computer this will need
@@ -48,11 +51,11 @@ class CanJamSynth:
         self.curr_channel = START_CHANNEL
         self.curr_velocity = DEFAULT_VELOCITY
 
-        # load sound fonts
-        for channel, synth_type in enumerate(list(SynthType)):
-            font_id = self.fluid_synth.sfload(synth_type.value)
-            # TODO: figure out what program_select does
-            self.fluid_synth.program_select(channel, font_id, 0, 0)
+        font_path = font.value
+
+        font_id = self.fluid_synth.sfload(font_path)
+        # TODO: figure out what program_select does
+        self.fluid_synth.program_select(START_CHANNEL, font_id, 0, 0)
 
     def __del__(self):
         """ """
