@@ -21,11 +21,13 @@ MAX_SYNTH_CHANNELS = 5
 
 class SynthType(Enum):
     PIANO = "canjam/sound_fonts/example.sf2"
-    DRUMS = "canjam/sound_fonts/drums.sf2"
+    MARIO = "canjam/sound_fonts/SuperMarioKart.sf2"    
+    BELLS = "canjam/sound_fonts/Tubular_Carillon.sf2"
+    PIANO2 = "canjam/sound_fonts/example.sf2"
 
 
 class CanJamSynth:
-    def __init__(self, font: SynthType = SynthType.PIANO):
+    def __init__(self, font:SynthType):
         """
         Intialize a CanJamSynth with defined presets.
         note: If you have fewer than 2 channels on your computer this will need
