@@ -60,6 +60,8 @@ class CanJammer:
             # Send NewUser message out to all new connected peers
             new_user_message = NewUser(self.name)
             for user in self.user_set:
+                print(f"Connecting to...{user}")
+                sock.connect(user.address)
                 self.out_queue.put((new_user_message, user.address))
 
         print("You're reachable at:")
@@ -145,7 +147,7 @@ class CanJammer:
                     game_runner = GameRunner(self.in_queue, self.out_queue)
                     game_runner.run_game()
                 except KeyboardInterrupt:
-                    self.in_queue.put(Die())
+                    pass
                 finally:
                     # Notify all connected peers that CanJam user is leaving
                     del_user = DelUser(self.name)

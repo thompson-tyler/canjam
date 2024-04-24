@@ -85,7 +85,7 @@ class GameRunner:
 
     def sound_handler(self, color_queue: Queue[Cell]):
         """ """
-        synth2 = CanJamSynth(SynthType.TRUMPET)
+        synth2 = CanJamSynth(SynthType.PIANO)
 
         while self.running:
             match self.in_queue.get():
@@ -126,9 +126,8 @@ class GameRunner:
                 if event.type == pygame.KEYDOWN:
                     response = event.unicode
                     if response == ESCAPE_KEY:
-                        self.in_queue.put(Die())
-                        self.out_queue.put((Die(), None))
                         self.running = False
+                        self.in_queue.put(Die())
 
             # if user presses mouse, set current tile to their color
             if pygame.mouse.get_pressed()[0]:

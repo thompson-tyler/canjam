@@ -81,7 +81,6 @@ class InboundWorker:
                     self.in_queue.put(message)
 
                 case Die():
-                    self.in_queue.put(Die())
                     break
 
                 case _:
