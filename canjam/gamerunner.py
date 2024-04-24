@@ -41,7 +41,9 @@ PLAYER_COLORS = [
 class GameRunner:
     """A module that runs the CanJam game GUI using pygame."""
 
-    def __init__(self, in_queue: Queue[Message], out_queue: Queue[Message]):
+    def __init__(
+        self, in_queue: Queue[Message], out_queue: Queue[Message], peer_num: int
+    ):
         self.in_queue = in_queue
         self.out_queue = out_queue
 
@@ -49,7 +51,8 @@ class GameRunner:
         self.screen_notifier = Semaphore(0)
 
         self.color = choice(PLAYER_COLORS)
-        self.synth_type = SynthType.PIANO2
+        self.synth_type = [s for s in SynthType][peer_num % len(SynthType)]
+        vprint(f"Player {peer_num} is using synth {self.synth_type}")
 
         self.grid = [
             [Color.GRAY.value for _ in range(WIDTH)] for _ in range(WIDTH)
@@ -91,7 +94,9 @@ class GameRunner:
 
     def sound_handler(self, color_queue: Queue[Cell]):
         """ """
-        synth2 = CanJamSynth(SynthType.TRUMPET)
+        synths = {
+            synth_type: CanJamSynth(synth_type) for synth_type in SynthType
+        }
 
         while self.running:
             match self.in_queue.get():
@@ -99,7 +104,7 @@ class GameRunner:
                     return
                 # TODO: play note with different synth from different user?
                 case Sound(note, color, synth_type):
-                    synth2.play_note(note)
+                    synths[synth_type].play_note(note)
                     (row, col) = (note // WIDTH, note % WIDTH)
                     color_queue.put(Cell(color, (row, col)))
 

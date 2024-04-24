@@ -24,7 +24,6 @@ class SynthType(Enum):
     PIANO = "canjam/sound_fonts/example.sf2"
     MARIO = "canjam/sound_fonts/SuperMarioKart.sf2"
     BELLS = "canjam/sound_fonts/Tubular_Carillon.sf2"
-    PIANO2 = "canjam/sound_fonts/example.sf2"
     TRUMPET = "canjam/sound_fonts/battletoads.sf2"
 
 

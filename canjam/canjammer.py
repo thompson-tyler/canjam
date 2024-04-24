@@ -144,7 +144,9 @@ class CanJammer:
             ):
                 try:
                     # TODO: start the GameRunner module
-                    game_runner = GameRunner(self.in_queue, self.out_queue)
+                    game_runner = GameRunner(
+                        self.in_queue, self.out_queue, len(self.user_set)
+                    )
                     game_runner.run_game()
                 except KeyboardInterrupt:
                     pass
@@ -155,4 +157,3 @@ class CanJammer:
                     for user in self.user_set:
                         print("Sending", del_user, "to", user.address)
                         self.out_queue.put((del_user, user.address))
-                    
