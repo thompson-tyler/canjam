@@ -213,7 +213,7 @@ class CustomSocketTest(unittest.TestCase):
             Jamsocket(PORT1, badsocket) as dest_sock,
             Jamsocket(PORT2, badsocket) as sock,
         ):
-            m = RspUserList([User("Alice", 1), User("Bob", 2)])
+            m = RspUserList("skylar", [User("Alice", 1), User("Bob", 2)])
             data = m.serialize()
 
             sock.connect((LOCALHOST, PORT1))
@@ -222,7 +222,8 @@ class CustomSocketTest(unittest.TestCase):
             rec_data = dest_sock.recv()
             rec_m = Message.deserialize(rec_data)
             match rec_m:
-                case RspUserList(user_list):
+                case RspUserList(name, user_list):
+                    self.assertEqual(name, "skylar")
                     self.assertIsInstance(user_list, list)
                     self.assertEqual(len(user_list), 2)
                     self.assertIsInstance(user_list[0], User)
