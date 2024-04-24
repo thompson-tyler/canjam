@@ -7,12 +7,14 @@ from threading import Semaphore
 from canjam.jamsocket import Jamsocket, address
 from canjam.inboundworker import InboundWorker
 from canjam.outboundworker import OutboundWorker
+from canjam.gamerunner import GameRunner
 from canjam.message import (
     Message,
     ReqUserList,
     RspUserList,
     NewUser,
     DelUser,
+    Die,
 )
 from canjam.user import User
 from canjam.logger import vprint, set_verbose
@@ -132,21 +134,18 @@ class CanJammer:
 
             with (
                 InboundWorker(
-                    sock, self.notifier, self.name, self.in_queue, self.user_set
+                    sock, self.name, self.in_queue, self.user_set
                 ) as inbound_worker,
                 OutboundWorker(
-                    sock, self.notifier, self.name, self.out_queue
+                    sock, self.name, self.out_queue, self.user_set
                 ) as outbound_worker,
             ):
                 try:
                     # TODO: start the GameRunner module
-
-                    # TODO: change to checking some sort of internal flag indicating what CanJammer was awoken for
-                    while True:
-                        self.notifier.acquire()
-                        vprint(f"User list is now {self.user_set}!")
+                    game_runner = GameRunner(self.in_queue, self.out_queue)
+                    game_runner.run_game()
                 except KeyboardInterrupt:
-                    pass
+                    self.in_queue.put(Die())
                 finally:
                     # Notify all connected peers that CanJam user is leaving
                     del_user = DelUser(self.name)
@@ -154,3 +153,4 @@ class CanJammer:
                     for user in self.user_set:
                         print("Sending", del_user, "to", user.address)
                         self.out_queue.put((del_user, user.address))
+                    

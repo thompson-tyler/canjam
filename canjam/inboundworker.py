@@ -26,17 +26,15 @@ class InboundWorker:
     def __init__(
         self,
         sock: Jamsocket,
-        notifier: Semaphore,
         name: str,
-        in_queue: Queue[Message] = Queue(),
-        user_set: set[User] = None,
+        in_queue: Queue[Message],
+        user_set: set[User]
     ):
         self.sock = sock
         self.name = name
 
         self.in_queue = in_queue
-        self.user_set = user_set if user_set else set()
-        self.notifier = notifier
+        self.user_set = user_set
 
         self.__worker_thread = Thread(target=self.__worker_job)
 
@@ -66,23 +64,24 @@ class InboundWorker:
                     vprint("Received user list response from", address)
                     new_user_set.add(User(peer_name, address))
                     self.user_set.update(new_user_set)
-                    self.notifier.release()
+                    # self.notifier.release()
 
                 case NewUser(name):
                     vprint("New user", name, "from", address)
                     self.user_set.add(User(name, address))
-                    self.notifier.release()
+                    # self.notifier.release()
 
                 case DelUser(name):
                     vprint("User", name, "left the room")
                     self.user_set.remove(User(name, address))
-                    self.notifier.release()
+                    # self.notifier.release()
 
                 case Sound(sound):
                     vprint("Received sound", sound, "from", address)
                     self.in_queue.put(message)
 
                 case Die():
+                    self.in_queue.put(Die())
                     break
 
                 case _:

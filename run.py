@@ -1,9 +1,11 @@
 from queue import Queue
 from time import time, sleep
+from argparse import ArgumentParser
+
 from socket import gethostname, gethostbyname_ex
 
 from canjam.canjammer import CanJammer
-
+from canjam.gamerunner import GameRunner
 
 def build_parser():
     """
@@ -42,7 +44,6 @@ def build_parser():
     )
     return parser
 
-
 def main():
     parser = build_parser()
     args = parser.parse_args()
@@ -50,7 +51,7 @@ def main():
     canjammer: CanJammer = CanJammer(args)
     canjammer.run()
 
-
 if __name__ == "__main__":
-    game_runner = GameRunner(Queue(), Queue())
-    game_runner.run_game()
+    main()
+    # game_runner = GameRunner(Queue(), Queue())
+    # game_runner.run_game()

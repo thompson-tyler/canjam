@@ -3,6 +3,7 @@ from threading import Thread, Semaphore
 
 from canjam.jamsocket import Jamsocket, address
 from canjam.message import Message, Sound, Die
+from canjam.user import User
 from canjam.logger import vprint
 
 
@@ -22,15 +23,15 @@ class OutboundWorker:
     def __init__(
         self,
         sock: Jamsocket,
-        notifier: Semaphore,
         name: str,
-        out_queue: Queue[Message] = Queue(),
+        out_queue: Queue[tuple[Message, address]],
+        user_set: set[User],
     ):
         self.sock = sock
         self.name = name
+        self.user_set = user_set
 
         self.out_queue = out_queue
-        self.notifier = notifier
 
         self.__worker_thread = Thread(target=self.__worker_job)
 
@@ -55,7 +56,11 @@ class OutboundWorker:
                 case Die():
                     return
                 case Sound(_):
-                    self.sock.sendto_unreliably(message.serialize(), address)
+                    vprint("Starting sound broadcast")
+                    for user in self.user_set:
+                        vprint(f"Sending sound to {user.name} at {user.address}")
+                        self.sock.sendto_unreliably(message.serialize(), 
+                                                    user.address)
                 case _:
                     vprint(f"Reliably sending {message}!")
                     self.sock.sendto_reliably(message.serialize(), address)

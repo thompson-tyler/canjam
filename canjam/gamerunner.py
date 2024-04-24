@@ -33,7 +33,6 @@ PLAYER_COLORS = [
     Color.BLUEB.value,
 ]
 
-
 class GameRunner:
     """A module that runs the CanJam game GUI using pygame."""
 
@@ -76,7 +75,7 @@ class GameRunner:
         self.draw_grid(game_obj=pygame, screen=screen)
         pygame.display.flip()
 
-        sleep(0.09)  # TODO: why?
+        sleep(0.025)  # TODO: why?
 
         self.draw_grid(game_obj=pygame, screen=screen)
         pygame.display.flip()
@@ -128,7 +127,7 @@ class GameRunner:
                     response = event.unicode
                     if response == ESCAPE_KEY:
                         self.in_queue.put(Die())
-                        self.out_queue.put(Die())
+                        self.out_queue.put((Die(), None))
                         self.running = False
 
             # if user presses mouse, set current tile to their color
@@ -148,7 +147,7 @@ class GameRunner:
                     # play locally and out_queue to broadcast
                     sound = Sound(row * WIDTH + col, self.color, self.synth_type)
                     self.in_queue.put(sound)
-                    self.out_queue.put(sound)
+                    self.out_queue.put((sound, None))
 
                     # set color and redraw screen to flash cell
                     self.set_grid_color(row, col, self.color, screen)
