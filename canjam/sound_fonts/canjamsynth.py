@@ -18,14 +18,14 @@ DEFAULT_VELOCITY = 100
 DEFAULT_SYS_AUDIO_CHANNELS = 2
 MAX_SYNTH_CHANNELS = 5
 
+
 class SynthType(Enum):
     PIANO = "canjam/sound_fonts/example.sf2"
     DRUMS = "canjam/sound_fonts/drums.sf2"
 
+
 class CanJamSynth:
-    def __init__(self, 
-                 start_channel=START_CHANNEL,
-                 font: SynthType = SynthType.PIANO):
+    def __init__(self, start_channel=START_CHANNEL, font: SynthType = SynthType.PIANO):
         """
         Intialize a CanJamSynth with defined presets.
         note: If you have fewer than 2 channels on your computer this will need
@@ -44,31 +44,28 @@ class CanJamSynth:
         )
 
         self.fluid_synth = fluidsynth.Synth()
-        
+
         self.curr_channel = start_channel
         self.curr_velocity = DEFAULT_VELOCITY
-        
+
         # load sound fonts
-        for (channel, synth_type) in enumerate(list(SynthType)):
+        for channel, synth_type in enumerate(list(SynthType)):
             font_id = self.fluid_synth.sfload(synth_type.value)
             # TODO: figure out what program_select does
             self.fluid_synth.program_select(channel, font_id, 0, 0)
 
     def __del__(self):
-        """
-        """
+        """ """
         self.py_audio.close(self.stream)
         self.py_audio.terminate()
 
     def play_from_keystroke(self, keystroke: str):
-        """
-        """
+        """ """
         note = self.bindings[keystroke]
         self.play_note(note)
 
     def play_note(self, note: int):
-        """
-        """
+        """ """
         sound = []
         self.fluid_synth.noteon(self.curr_channel, note, self.curr_velocity)
 

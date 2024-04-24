@@ -73,9 +73,7 @@ class InboundWorker:
                     self.user_list.append(new_user)
                 case DelUser(name):
                     vprint("User", name, "left the room")
-                    self.user_list[:] = [
-                        u for u in self.user_list if u.name != name
-                    ]
+                    self.user_list[:] = [u for u in self.user_list if u.name != name]
                 case Sound(sound):
                     vprint("Received sound", sound, "from", address)
                     self.in_queue.put(message)

@@ -5,21 +5,32 @@ import pygame
 from random import choice
 
 # this Queue will be changed once we have handoff from @skylar and @tyler
-from queue import (Queue, Empty)
+from queue import Queue, Empty
 from time import sleep
 from canjam.sound_fonts.canjamsynth import CanJamSynth
 
 # from canjam.logger import vprint
 from canjam.message import Message, Sound, Die, Color, SynthType
+from canjam.logger import vprint
 
 WIDTH = 9
 
 ### GAME CONSTANTS ###
 GRID_SQUARE_SIZE = 50
-GRID_MARGIN = 5
-SCREEN_HEIGHT = (GRID_SQUARE_SIZE + GRID_MARGIN) * WIDTH
-SCREEN_WIDTH = (GRID_SQUARE_SIZE + GRID_MARGIN) * WIDTH
+GRID_GAP = 5
+GRID_MARGIN = 10
+SCREEN_HEIGHT = (GRID_SQUARE_SIZE + GRID_GAP) * WIDTH + (2 * GRID_MARGIN) - GRID_GAP
+SCREEN_WIDTH = (GRID_SQUARE_SIZE + GRID_GAP) * WIDTH + (2 * GRID_MARGIN) - GRID_GAP
 ESCAPE_KEY = "\x1b"
+
+PLAYER_COLORS = [
+    Color.STRAWB.value,
+    Color.ORANGE.value,
+    Color.HONEY.value,
+    Color.MATCHA.value,
+    Color.MINT.value,
+    Color.BLUEB.value,
+]
 
 
 class GameRunner:
@@ -30,7 +41,7 @@ class GameRunner:
         self.out_queue = out_queue
 
         # select a random Color and a random Synth
-        self.color = choice(list(Color))
+        self.color = choice(PLAYER_COLORS)
         self.synth_type = choice(list(SynthType))
 
         self.player_synth = CanJamSynth(font=self.synth_type)
@@ -41,8 +52,8 @@ class GameRunner:
         for row in range(WIDTH):
             for col in range(WIDTH):
                 rect = pygame.Rect(
-                    col * (GRID_SQUARE_SIZE + GRID_MARGIN),
-                    row * (GRID_SQUARE_SIZE + GRID_MARGIN),
+                    (col * (GRID_SQUARE_SIZE + GRID_GAP)) + GRID_MARGIN,
+                    (row * (GRID_SQUARE_SIZE + GRID_GAP)) + GRID_MARGIN,
                     GRID_SQUARE_SIZE,
                     GRID_SQUARE_SIZE,
                 )
@@ -62,7 +73,6 @@ class GameRunner:
         pygame.display.flip()
         sleep(0.09)  # TODO: why?
         self.grid[row][col] = Color.GRAY.value
-             
 
     def run_game(self):
         """ """
@@ -74,27 +84,8 @@ class GameRunner:
         screen.fill(Color.WHITE.value)
 
         # TODO: optimize and put sound player and grid color setter in separate threads?
-        while True:
-            # TODO: don't block? if empty, get next pygame event
-            try:
-                match self.in_queue.get():
-                    # if Die, terminate OutboundWorker and self
-                    case Die():
-                        self.out_queue.put(Die())
-                        break
-                    # if Sound, instruct Player to play and Visualizer to render
-                    case Sound(note, color, synth):
-                        print(
-                            f"Received someone else's sound: {note}, color: {color}, synth: {synth}"
-                        )
-
-                        self.player_synth.play_note(note)
-                        self.set_grid_color(note / WIDTH, note % WIDTH, color)
-                    case _:
-                        print(f"Received something weird...")
-            except Empty:
-                pass
-
+        running = True
+        while running:
             # if user presses escape, shut down game
             # TODO: nice options GUI to set color and synth?
             for event in pygame.event.get():
@@ -102,22 +93,26 @@ class GameRunner:
                     response = event.unicode
                     if response == ESCAPE_KEY:
                         self.out_queue.put(Die())
-                        break
+                        running = False
 
             # if user presses mouse, set current tile to their color
             if pygame.mouse.get_pressed()[0]:
-                mouse_pos = pygame.mouse.get_pos()
-                col = mouse_pos[0] // (GRID_SQUARE_SIZE + GRID_MARGIN)
-                row = mouse_pos[1] // (GRID_SQUARE_SIZE + GRID_MARGIN)
+                (xpos, ypos) = pygame.mouse.get_pos()
+                in_bounds = (
+                    xpos >= GRID_MARGIN
+                    and xpos <= SCREEN_HEIGHT - GRID_MARGIN - GRID_GAP
+                    and ypos >= GRID_MARGIN
+                    and ypos <= SCREEN_HEIGHT - GRID_MARGIN - GRID_GAP
+                )
+                if in_bounds:
+                    col = (xpos - GRID_MARGIN) // (GRID_SQUARE_SIZE + GRID_GAP)
+                    row = (ypos - GRID_MARGIN) // (GRID_SQUARE_SIZE + GRID_GAP)
 
-                # create note from mouse position and send Sound to out_queue
-                note = row * WIDTH + col
-                self.out_queue.put(Sound(note, self.col, self.synth_type))
-
-                self.player_synth.play_note(note)
-                self.set_grid_color(row, col, self.color, screen)
+                    # create note from mouse position and send Sound to out_queue
+                    self.set_grid_color(row, col, self.color, screen)
 
             self.draw_grid(game_obj=pygame, screen=screen)
             pygame.display.flip()
 
+        pygame.display.quit()
         pygame.quit()

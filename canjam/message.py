@@ -5,6 +5,7 @@ from enum import Enum
 from canjam.user import User
 from canjam.sound_fonts.canjamsynth import SynthType
 
+
 class Message:
     def serialize(self) -> bytes:
         return dumps(self)
@@ -15,6 +16,7 @@ class Message:
         if not isinstance(m, Message):
             raise ValueError("Deserialized object is not a Message")
         return m
+
 
 class Color(Enum):
     STRAWB = (249, 65, 68)
@@ -60,6 +62,7 @@ class DelUser(Message):
 @dataclass
 class Die(Message):
     pass
+
 
 @dataclass
 class Die(Message):
