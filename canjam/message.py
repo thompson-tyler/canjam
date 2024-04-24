@@ -17,7 +17,6 @@ class Message:
             raise ValueError("Deserialized object is not a Message")
         return m
 
-
 class Color(Enum):
     STRAWB = (249, 65, 68)
     ORANGE = (243, 114, 44)
@@ -30,6 +29,10 @@ class Color(Enum):
     BLACK = (0, 0, 0)
     GRAY = (200, 200, 200)
 
+@dataclass
+class Cell():
+    coords: tuple[int, int]
+    color: Color
 
 @dataclass
 class Sound(Message):
