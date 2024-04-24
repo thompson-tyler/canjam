@@ -19,6 +19,7 @@ DEFAULT_SYS_AUDIO_CHANNELS = 2
 MAX_SYNTH_CHANNELS = 5
 
 
+#fonts 
 class SynthType(Enum):
     PIANO = "canjam/sound_fonts/example.sf2"
     MARIO = "canjam/sound_fonts/SuperMarioKart.sf2" 
