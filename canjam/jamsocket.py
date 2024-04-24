@@ -13,6 +13,9 @@ ACK_TIMEOUT = 0.1
 # The number of times jamsocket will resend a packet before giving up
 MAX_RESENDS = 50
 
+# Default IP to listen on
+BIND_IP = "0.0.0.0"
+
 # A handy type alias for an address tuple - a host address and a port
 address = tuple[str, int]
 
@@ -141,7 +144,11 @@ class Jamsocket:
     __connections: list[Connection]
     __connections_lock: Lock
 
-    def __init__(self, port: int, socket_type: type[socket] = socket):
+    def __init__(
+        self,
+        port: int,
+        socket_type: type[socket] = socket,
+    ):
         self.__sock = socket_type(AF_INET, SOCK_DGRAM)
         self.__needs_ack = []
         self.__inbox = Queue()
@@ -150,7 +157,14 @@ class Jamsocket:
         self.__connections = []
         self.__connections_lock = Lock()
 
-        self.__sock.bind(("localhost", port))
+        try:
+            # Binding to 0.0.0.0 allows us to receive packets from any address
+            self.__sock.bind(("0.0.0.0", port))
+        except PermissionError:
+            raise PermissionError(
+                f"Permission denied to bind to port {port}. Try running the "
+                + "program as an administrator or using a different port."
+            )
         self.__inbox_worker_thread.start()
 
     def __enter__(self):
@@ -400,6 +414,13 @@ class Jamsocket:
         out_packet.ack_received.acquire()
         return len(out_packet.data)
 
+    def sendto_self(self, data: bytes):
+        """
+        Sends data to the local host. Returns the length of the data that was
+        sent.
+        """
+        return self.sendto_unreliably(data, self.__sock.getsockname())
+
     def recvfrom(self, timeout: float | None = None):
         """
         Blocks until a datagram is available in the buffer, then returns the
@@ -420,3 +441,9 @@ class Jamsocket:
         """
         data, _ = self.recvfrom(timeout)
         return data
+
+    def getsockname(self):
+        """
+        Returns the address of the socket.
+        """
+        return self.__sock.getsockname()

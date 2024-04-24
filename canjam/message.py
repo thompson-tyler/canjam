@@ -43,17 +43,23 @@ class ReqUserList(Message):
 
 @dataclass
 class RspUserList(Message):
+    source_name: str
     user_list: set[User]
 
 
 @dataclass
 class NewUser(Message):
-    user: User
+    name: str
 
 
 @dataclass
 class DelUser(Message):
-    user: User
+    name: str
+
+
+@dataclass
+class Die(Message):
+    pass
 
 @dataclass
 class Die(Message):

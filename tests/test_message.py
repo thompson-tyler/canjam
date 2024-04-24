@@ -31,11 +31,14 @@ class MessageSerializationTest(unittest.TestCase):
         self.assertIsInstance(m2, ReqUserList)
 
     def test_serialize_rsp_user_list_message(self):
-        m = RspUserList([User("Alice", 1), User("Bob", 2)])
+        m = RspUserList("Eve", [User("Alice", 1), User("Bob", 2)])
         data = m.serialize()
         m2 = Message.deserialize(data)
         match m2:
-            case RspUserList(user_list):
+            case RspUserList(name, user_list):
+                self.assertIsInstance(name, str)
+                self.assertEqual(name, "Eve")
+
                 self.assertIsInstance(user_list, list)
                 self.assertEqual(len(user_list), 2)
                 self.assertIsInstance(user_list[0], User)
@@ -48,26 +51,24 @@ class MessageSerializationTest(unittest.TestCase):
                 self.fail("Deserialized message is not of the correct type")
 
     def test_serialize_new_user_message(self):
-        m = NewUser(User("Alice", 1))
+        m = NewUser("Alice")
         data = m.serialize()
         m2 = Message.deserialize(data)
         match m2:
-            case NewUser(user):
-                self.assertIsInstance(user, User)
-                self.assertEqual(user.name, "Alice")
-                self.assertEqual(user.address, 1)
+            case NewUser(name):
+                self.assertIsInstance(name, str)
+                self.assertEqual(name, "Alice")
             case _:
                 self.fail("Deserialized message is not of the correct type")
 
     def test_serialize_del_user_message(self):
-        m = DelUser(User("Alice", 1))
+        m = DelUser("Alice")
         data = m.serialize()
         m2 = Message.deserialize(data)
         match m2:
-            case DelUser(user):
-                self.assertIsInstance(user, User)
-                self.assertEqual(user.name, "Alice")
-                self.assertEqual(user.address, 1)
+            case DelUser(name):
+                self.assertIsInstance(name, str)
+                self.assertEqual(name, "Alice")
             case _:
                 self.fail("Deserialized message is not of the correct type")
 
