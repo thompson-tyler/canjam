@@ -86,7 +86,8 @@ class GameRunner:
 
     def sound_handler(self, color_queue: Queue[Cell]):
         """ """
-        synth = CanJamSynth("piano")
+        # synth = CanJamSynth(SynthType.PIANO)
+        synth2 = CanJamSynth(SynthType.MARIO)
 
         while self.running:
             match self.in_queue.get():
@@ -94,7 +95,8 @@ class GameRunner:
                     return
                 # TODO: play note with different synth from different user?
                 case Sound(note, color, synth_type):
-                    synth.play_note(note)
+                    # synth.play_note(note)
+                    synth2.play_note(note)
                     (row, col) = (note // WIDTH, note % WIDTH)
                     color_queue.put(Cell(color, (row, col)))
 

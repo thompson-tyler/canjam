@@ -21,10 +21,9 @@ MAX_SYNTH_CHANNELS = 5
 
 class SynthType(Enum):
     PIANO = "canjam/sound_fonts/example.sf2"
-    MARIO = "canjam/sound_fonts/SuperMarioKart.sf2"    
+    MARIO = "canjam/sound_fonts/SuperMarioKart.sf2" 
     BELLS = "canjam/sound_fonts/Tubular_Carillon.sf2"
-    PIANO2 = "canjam/sound_fonts/example.sf2"
-
+    PIANO2 =  "canjam/sound_fonts/example.sf2"
 
 class CanJamSynth:
     def __init__(self, font:SynthType):
@@ -50,11 +49,12 @@ class CanJamSynth:
         self.curr_channel = START_CHANNEL
         self.curr_velocity = DEFAULT_VELOCITY
 
-        # load sound fonts
-        for channel, synth_type in enumerate(list(SynthType)):
-            font_id = self.fluid_synth.sfload(synth_type.value)
-            # TODO: figure out what program_select does
-            self.fluid_synth.program_select(channel, font_id, 0, 0)
+        channel = 0
+        font_path = font.value
+
+        font_id = self.fluid_synth.sfload(font_path)
+        # TODO: figure out what program_select does
+        self.fluid_synth.program_select(channel, font_id, 0, 0)
 
     def __del__(self):
         """ """
