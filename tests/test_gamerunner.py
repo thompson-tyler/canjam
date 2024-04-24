@@ -2,7 +2,7 @@ import unittest
 
 from canjam.message import Synth
 from canjam.gamerunner import GameRunner
-from canjam.sound_fonts.canjamsynth import CanJamSynth
+from canjam.canjamsynth import CanJamSynth
 
 
 class GameRunnerTest(unittest.TestCase):

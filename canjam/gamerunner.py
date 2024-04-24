@@ -8,7 +8,7 @@ from random import choice
 from threading import Thread, Semaphore, Lock
 from queue import Queue, Empty
 from time import sleep
-from canjam.sound_fonts.canjamsynth import CanJamSynth
+from canjam.canjamsynth import CanJamSynth
 
 # from canjam.logger import vprint
 from canjam.message import Message, Sound, Die, Color, SynthType, Cell
@@ -20,8 +20,12 @@ WIDTH = 9
 GRID_SQUARE_SIZE = 50
 GRID_GAP = 5
 GRID_MARGIN = 10
-SCREEN_HEIGHT = (GRID_SQUARE_SIZE + GRID_GAP) * WIDTH + (2 * GRID_MARGIN) - GRID_GAP
-SCREEN_WIDTH = (GRID_SQUARE_SIZE + GRID_GAP) * WIDTH + (2 * GRID_MARGIN) - GRID_GAP
+SCREEN_HEIGHT = (
+    (GRID_SQUARE_SIZE + GRID_GAP) * WIDTH + (2 * GRID_MARGIN) - GRID_GAP
+)
+SCREEN_WIDTH = (
+    (GRID_SQUARE_SIZE + GRID_GAP) * WIDTH + (2 * GRID_MARGIN) - GRID_GAP
+)
 ESCAPE_KEY = "\x1b"
 
 PLAYER_COLORS = [
@@ -33,6 +37,7 @@ PLAYER_COLORS = [
     Color.BLUEB.value,
 ]
 
+
 class GameRunner:
     """A module that runs the CanJam game GUI using pygame."""
 
@@ -43,12 +48,12 @@ class GameRunner:
         self.running = True
         self.screen_notifier = Semaphore(0)
 
-        self.color = choice(PLAYER_COLORS)        
+        self.color = choice(PLAYER_COLORS)
         self.synth_type = SynthType.PIANO2
-    
-    
-        
-        self.grid = [[Color.GRAY.value for _ in range(WIDTH)] for _ in range(WIDTH)]
+
+        self.grid = [
+            [Color.GRAY.value for _ in range(WIDTH)] for _ in range(WIDTH)
+        ]
 
     def draw_grid(self, game_obj, screen):
         """Draw the CanJam GUI's grid of colors."""
@@ -62,7 +67,9 @@ class GameRunner:
                 )
                 game_obj.draw.rect(screen, self.grid[row][col], rect)
 
-    def set_grid_color(self, row: int, col: int, color: Color, screen: pygame.Surface):
+    def set_grid_color(
+        self, row: int, col: int, color: Color, screen: pygame.Surface
+    ):
         """Set and re-render the specified color on the CanJam grid.
 
         Args:
@@ -71,21 +78,20 @@ class GameRunner:
             grid_colors (_type_): _description_
         """
         self.grid[row][col] = color
-        
+
         self.draw_grid(game_obj=pygame, screen=screen)
         pygame.display.flip()
 
-        sleep(0.025)  # TODO: why?
+        sleep(0.05)  # TODO: why?
 
         self.draw_grid(game_obj=pygame, screen=screen)
         pygame.display.flip()
 
         self.grid[row][col] = Color.GRAY.value
 
-
     def sound_handler(self, color_queue: Queue[Cell]):
         """ """
-        synth2 = CanJamSynth(SynthType.PIANO)
+        synth2 = CanJamSynth(SynthType.TRUMPET)
 
         while self.running:
             match self.in_queue.get():
@@ -107,8 +113,9 @@ class GameRunner:
 
         color_queue: Queue[Cell] = Queue()
 
-        sound_player = Thread(target=GameRunner.sound_handler, 
-                              args=[self, color_queue])
+        sound_player = Thread(
+            target=GameRunner.sound_handler, args=[self, color_queue]
+        )
 
         sound_player.start()
 
@@ -116,7 +123,7 @@ class GameRunner:
             try:
                 match color_queue.get_nowait():
                     case Cell(color, (row, col)):
-                       self.set_grid_color(row, col, color, screen)
+                        self.set_grid_color(row, col, color, screen)
             except Empty:
                 pass
 
@@ -126,8 +133,8 @@ class GameRunner:
                 if event.type == pygame.KEYDOWN:
                     response = event.unicode
                     if response == ESCAPE_KEY:
-                        self.running = False
                         self.in_queue.put(Die())
+                        self.running = False
 
             # if user presses mouse, set current tile to their color
             if pygame.mouse.get_pressed()[0]:
@@ -144,7 +151,9 @@ class GameRunner:
 
                     # create sound from mouse position, send to in_queue to
                     # play locally and out_queue to broadcast
-                    sound = Sound(row * WIDTH + col, self.color, self.synth_type)
+                    sound = Sound(
+                        row * WIDTH + col, self.color, self.synth_type
+                    )
                     self.in_queue.put(sound)
                     self.out_queue.put((sound, None))
 
