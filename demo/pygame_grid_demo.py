@@ -1,7 +1,7 @@
 # program to display a notes grid with corresponding notes displayed
 # that then plays the notes on keypress to the specified grid area 
 
-from canjamsynth import CanJamSynth
+from canjam.multiprocessing_pygame.sound_fonts.canjamsynth import CanJamSynth
 
 import pygame as pg
 
