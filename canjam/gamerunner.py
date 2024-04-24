@@ -40,11 +40,14 @@ class GameRunner:
     def __init__(self, in_queue: Queue[Message], out_queue: Queue[Message]):
         self.in_queue = in_queue
         self.out_queue = out_queue
+
         self.running = True
+        self.screen_notifier = Semaphore(0)
+        self.sound_notifier = Semaphore(0)
 
         # select a random Color and a random Synth
         self.color = choice(PLAYER_COLORS)
-        self.synth_type = choice(list(SynthType))
+        self.synth_type = choice(list(SynthType)).value
 
         self.player_synth = CanJamSynth(font=self.synth_type)
         self.grid = [[Color.GRAY.value for _ in range(WIDTH)] for _ in range(WIDTH)]
@@ -73,15 +76,14 @@ class GameRunner:
         """
         with self.grid_lock:
             self.grid[row][col] = color
-       
-        sleep(0.1)  # TODO: why?
+
+        sleep(0.09)  # TODO: why?
 
         with self.grid_lock:
             self.grid[row][col] = Color.GRAY.value
 
     def screen_handler(self, notifier: Semaphore, screen: pygame.Surface):
-        """
-        """
+        """ """
         while self.running:
             self.draw_grid(game_obj=pygame, screen=screen)
             pygame.display.flip()
@@ -89,19 +91,22 @@ class GameRunner:
             # block until it's time to redraw the screen
             notifier.acquire()
 
-    # def sound_handler(self):
-    #     """
-    #     """
-    #     synth = CanJamSynth("piano")
+    def sound_handler(self):
+        """ """
+        synth = CanJamSynth("piano")
 
-    #     while True:
-    #         match self.in_queue.get():
-    #             case Die(_):
-    #                 return
-    #             case Sound(note, color, synth_type):
-    #                 synth.play_note(note)
-    #                 (row, col) = (note // WIDTH, note % WIDTH)
-    #                 self.set_grid_color(row, col, color, )
+        while self.running:
+            match self.in_queue.get():
+                case Die():
+                    return
+                # TODO: play note with different synth from different user?
+                case Sound(note, color, synth_type):
+                    synth.play_note(note)
+                    (row, col) = (note // WIDTH, note % WIDTH)
+
+                    # signal screen_refresher to redraw grid
+                    self.set_grid_color(row, col, color)
+                    self.screen_notifier.release()
 
     def run_game(self):
         """ """
@@ -111,15 +116,13 @@ class GameRunner:
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         screen.fill(Color.WHITE.value)
 
-        # TODO: optimize and put sound player and grid color setter in separate threads?
-        running = True
-        
-        screen_notifier = Semaphore(0)
-        screen_refresher = Thread(target=GameRunner.screen_handler,
-                                  args=[self,
-                                        screen_notifier,
-                                        screen]) 
+        screen_refresher = Thread(
+            target=GameRunner.screen_handler, args=[self, self.screen_notifier, screen]
+        )
+        sound_player = Thread(target=GameRunner.sound_handler, args=[self])
+
         screen_refresher.start()
+        sound_player.start()
 
         while self.running:
             # if user presses escape, shut down game
@@ -128,9 +131,10 @@ class GameRunner:
                 if event.type == pygame.KEYDOWN:
                     response = event.unicode
                     if response == ESCAPE_KEY:
+                        self.in_queue.put(Die())
                         self.out_queue.put(Die())
                         self.running = False
-                        screen_notifier.release()
+                        self.screen_notifier.release()
 
             # if user presses mouse, set current tile to their color
             if pygame.mouse.get_pressed()[0]:
@@ -145,10 +149,19 @@ class GameRunner:
                     row = (ypos - GRID_MARGIN) // (GRID_SQUARE_SIZE + GRID_GAP)
                     col = (xpos - GRID_MARGIN) // (GRID_SQUARE_SIZE + GRID_GAP)
 
-                    # create note from mouse position and send Sound to out_queue
-                    self.set_grid_color(row, col, self.color)
-                    screen_notifier.release()
+                    # create sound from mouse position, send to in_queue to
+                    # play locally and out_queue to broadcast
+                    sound = Sound(row * WIDTH + col, self.color, self.synth_type)
+                    self.in_queue.put(sound)
+                    self.sound_notifier.release()
+                    self.out_queue.put(sound)
 
-        screen_refresher.join
+                    # notify screen_refresher to redraw screen
+                    self.set_grid_color(row, col, self.color)
+                    self.screen_notifier.release()
+
+        screen_refresher.join()
+        sound_player.join()
+
         pygame.display.quit()
         pygame.quit()

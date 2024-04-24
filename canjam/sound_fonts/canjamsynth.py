@@ -25,7 +25,7 @@ class SynthType(Enum):
 
 
 class CanJamSynth:
-    def __init__(self, start_channel=START_CHANNEL, font: SynthType = SynthType.PIANO):
+    def __init__(self, font: SynthType = SynthType.PIANO):
         """
         Intialize a CanJamSynth with defined presets.
         note: If you have fewer than 2 channels on your computer this will need
@@ -45,7 +45,7 @@ class CanJamSynth:
 
         self.fluid_synth = fluidsynth.Synth()
 
-        self.curr_channel = start_channel
+        self.curr_channel = START_CHANNEL
         self.curr_velocity = DEFAULT_VELOCITY
 
         # load sound fonts
