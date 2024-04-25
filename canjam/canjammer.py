@@ -39,7 +39,7 @@ class CanJammer:
         # auto-assign a port
         self.name = args.name
         self.port: int = args.port or 0
-        self.address = CanJammer.__get_my_addr__()
+        self.address = CanJammer.__get_my_addr()
 
         self.in_queue = Queue()
         self.out_queue = Queue()
@@ -47,7 +47,7 @@ class CanJammer:
 
         self.notifier = Semaphore(0)
 
-    def __bootstrap_connection__(self, sock: Jamsocket):
+    def __bootstrap_connection(self, sock: Jamsocket):
         """Set up CanJammer's user_set: if the user is joining another
         CanJam user's room, request the other user's user_set and send
         NewUser messages to each new peer. Then, print out the user's
@@ -55,7 +55,7 @@ class CanJammer:
         """
 
         if self.join:
-            self.user_set = self.__request_user_set__(sock)
+            self.user_set = self.__request_user_set(sock)
 
             # Send NewUser message out to all new connected peers
             new_user_message = NewUser(self.name)
@@ -67,7 +67,7 @@ class CanJammer:
         print("You're reachable at:")
         print(f"\t{self.address}:{sock.getsockname()[1]}")
 
-    def __request_user_set__(self, sock: Jamsocket, timeout=5) -> list[User]:
+    def __request_user_set(self, sock: Jamsocket, timeout=5) -> list[User]:
         """
         Requests a room's user list from a peer at the specified address. A new
         socket connection will be made with the peer. If the peer does not
@@ -75,7 +75,7 @@ class CanJammer:
         will be raised.
         """
 
-        addr = CanJammer.__parse_address__(self.join)
+        addr = CanJammer.__parse_address(self.join)
         vprint(f"Joining peer room at {addr}")
 
         # Try to acquire the user list from the specified address
@@ -98,7 +98,7 @@ class CanJammer:
 
         raise TimeoutError("Failed to receive user list from peer")
 
-    def __parse_address__(address: str) -> address:
+    def __parse_address(address: str) -> address:
         """
         From a string of the format HOST:PORT where PORT is a valid integer, returns
         a tuple of the host and port as a string and integer, respectively. If the
@@ -115,7 +115,7 @@ class CanJammer:
             raise ValueError(f"Invalid port: {port_str}")
         return host, port
 
-    def __get_my_addr__():
+    def __get_my_addr():
         """
         Attempts to get your local IP address. If it fails, it will return None.
         """
@@ -135,7 +135,7 @@ class CanJammer:
         """
 
         with Jamsocket(self.port) as sock:
-            self.__bootstrap_connection__(sock)
+            self.__bootstrap_connection(sock)
 
             with (
                 InboundWorker(
