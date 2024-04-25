@@ -208,7 +208,7 @@ class Jamsocket:
                 data, from_address = self.__sock.recvfrom(4096)
                 new_packet: jampacket = loads(data)
                 self.__handle_packet(new_packet, from_address)
-            except TimeoutError:
+            except:
                 continue
 
     def __handle_packet(self, packet: jampacket, from_address: address):
@@ -310,11 +310,15 @@ class Jamsocket:
 
     # Returns a connection object if one exists, otherwise None
     def __conn_by_id(self, id_: uuid):
-        return next((conn for conn in self.__connections if conn.id_ == id_), None)
+        return next(
+            (conn for conn in self.__connections if conn.id_ == id_), None
+        )
 
     # Returns a connection object if one exists, otherwise None
     def __conn_by_address(self, addr: address):
-        return next((conn for conn in self.__connections if conn.peer == addr), None)
+        return next(
+            (conn for conn in self.__connections if conn.peer == addr), None
+        )
 
     def __put_skip(self):
         self.__sock.sendto(dumps(Skip()), self.__sock.getsockname())
