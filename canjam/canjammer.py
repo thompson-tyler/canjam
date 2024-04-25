@@ -67,7 +67,7 @@ class CanJammer:
         print("You're reachable at:")
         print(f"\t{self.address}:{sock.getsockname()[1]}")
 
-    def __request_user_set(self, sock: Jamsocket, timeout=5) -> list[User]:
+    def __request_user_set(self, sock: Jamsocket, timeout=5) -> set[User]:
         """
         Requests a room's user list from a peer at the specified address. A new
         socket connection will be made with the peer. If the peer does not
