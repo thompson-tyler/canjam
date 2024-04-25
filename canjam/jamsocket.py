@@ -207,9 +207,9 @@ class Jamsocket:
             try:
                 data, from_address = self.__sock.recvfrom(4096)
                 new_packet: jampacket = loads(data)
-                self.__handle_packet(new_packet, from_address)
             except:
                 continue
+            self.__handle_packet(new_packet, from_address)
 
     def __handle_packet(self, packet: jampacket, from_address: address):
         # Deserialize the packet and match on it
