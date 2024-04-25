@@ -119,8 +119,11 @@ class CanJammer:
         """
         Attempts to get your local IP address. If it fails, it will return None.
         """
-        _, _, aliases = gethostbyname_ex(gethostname())
-        return next(filter(lambda x: x != "127.0.0.1", aliases), None)
+        try:
+            _, _, aliases = gethostbyname_ex(gethostname())
+            return next(filter(lambda x: x != "127.0.0.1", aliases), None)
+        except:
+            return None
 
     def run(self):
         """Set up connection with other CanJam peers. If the user is joining
