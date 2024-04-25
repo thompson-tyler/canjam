@@ -98,6 +98,7 @@ class CanJammer:
 
         raise TimeoutError("Failed to receive user list from peer")
 
+    @staticmethod
     def __parse_address(address: str) -> address:
         """
         From a string of the format HOST:PORT where PORT is a valid integer, returns
@@ -115,6 +116,7 @@ class CanJammer:
             raise ValueError(f"Invalid port: {port_str}")
         return host, port
 
+    @staticmethod
     def __get_my_addr():
         """
         Attempts to get your local IP address. If it fails, it will return None.

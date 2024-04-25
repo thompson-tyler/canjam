@@ -62,11 +62,6 @@ class CanJamSynth:
         self.py_audio.close(self.stream)
         self.py_audio.terminate()
 
-    def play_from_keystroke(self, keystroke: str):
-        """ """
-        note = self.bindings[keystroke]
-        self.play_note(note)
-
     def play_note(self, note: int):
         """ """
         sound = []

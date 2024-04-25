@@ -13,6 +13,8 @@ from canjam.canjamsynth import CanJamSynth
 # from canjam.logger import vprint
 from canjam.message import Message, Sound, Die, Color, SynthType, Cell
 from canjam.logger import vprint
+from canjam.jamsocket import address
+from canjam.outboundworker import OutQueueType
 
 WIDTH = 9
 
@@ -29,12 +31,12 @@ SCREEN_WIDTH = (
 ESCAPE_KEY = "\x1b"
 
 PLAYER_COLORS = [
-    Color.STRAWB.value,
-    Color.ORANGE.value,
-    Color.HONEY.value,
-    Color.MATCHA.value,
-    Color.MINT.value,
-    Color.BLUEB.value,
+    Color.STRAWB,
+    Color.ORANGE,
+    Color.HONEY,
+    Color.MATCHA,
+    Color.MINT,
+    Color.BLUEB,
 ]
 
 
@@ -42,7 +44,10 @@ class GameRunner:
     """A module that runs the CanJam game GUI using pygame."""
 
     def __init__(
-        self, in_queue: Queue[Message], out_queue: Queue[Message], peer_num: int
+        self,
+        in_queue: Queue[Message],
+        out_queue: OutQueueType,
+        peer_num: int,
     ):
         self.in_queue = in_queue
         self.out_queue = out_queue
@@ -54,7 +59,7 @@ class GameRunner:
         self.synth_type = [s for s in SynthType][peer_num % len(SynthType)]
         vprint(f"Player {peer_num} is using synth {self.synth_type}")
 
-        self.grid = [
+        self.grid: list[list[tuple[int, int, int]]] = [
             [Color.GRAY.value for _ in range(WIDTH)] for _ in range(WIDTH)
         ]
 
@@ -80,7 +85,7 @@ class GameRunner:
             col (int): _description_
             grid_colors (_type_): _description_
         """
-        self.grid[row][col] = color
+        self.grid[row][col] = color.value
 
         self.draw_grid(game_obj=pygame, screen=screen)
         pygame.display.flip()
@@ -106,7 +111,7 @@ class GameRunner:
                 case Sound(note, color, synth_type):
                     synths[synth_type].play_note(note)
                     (row, col) = (note // WIDTH, note % WIDTH)
-                    color_queue.put(Cell(color, (row, col)))
+                    color_queue.put(Cell((row, col), color))
 
     def run_game(self):
         """ """
@@ -127,7 +132,7 @@ class GameRunner:
         while self.running:
             try:
                 match color_queue.get_nowait():
-                    case Cell(color, (row, col)):
+                    case Cell((row, col), color):
                         self.set_grid_color(row, col, color, screen)
             except Empty:
                 pass

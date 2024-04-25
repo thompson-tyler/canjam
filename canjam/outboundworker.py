@@ -7,6 +7,9 @@ from canjam.user import User
 from canjam.logger import vprint
 
 
+type OutQueueType = Queue[tuple[Message, address | None]]
+
+
 class OutboundWorker:
     """
     A multi-threaded worker that sends outgoing messages through a Jamsocket.
@@ -17,14 +20,14 @@ class OutboundWorker:
     """
 
     sock: Jamsocket
-    out_queue: Queue[tuple[Message, address]]
+    out_queue: OutQueueType
     __worker_thread: Thread
 
     def __init__(
         self,
         sock: Jamsocket,
         name: str,
-        out_queue: Queue[tuple[Message, address]],
+        out_queue: OutQueueType,
         user_set: set[User],
     ):
         self.sock = sock
@@ -58,9 +61,13 @@ class OutboundWorker:
                 case Sound(_):
                     vprint("Starting sound broadcast")
                     for user in self.user_set:
-                        vprint(f"Sending sound to {user.name} at {user.address}")
-                        self.sock.sendto_unreliably(message.serialize(), 
-                                                    user.address)
+                        vprint(
+                            f"Sending sound to {user.name} at {user.address}"
+                        )
+                        self.sock.sendto_unreliably(
+                            message.serialize(), user.address
+                        )
                 case _:
                     vprint(f"Reliably sending {message}!")
-                    self.sock.sendto_reliably(message.serialize(), address)
+                    if address is not None:
+                        self.sock.sendto_reliably(message.serialize(), address)
