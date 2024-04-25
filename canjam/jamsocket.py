@@ -136,9 +136,6 @@ class Jamsocket:
     # readers to pick up. Each item in the list is a tuple of the data and the
     # source address
     __inbox: Queue[tuple[bytes, address]]
-    # A semaphore that readers can wait on to be notified when a new packet is
-    # available in the inbox
-    __inbox_has_item: Semaphore
     __inbox_worker_thread: Thread
     # A list of active connections to other clients
     __connections: list[Connection]
@@ -152,7 +149,6 @@ class Jamsocket:
         self.__sock = socket_type(AF_INET, SOCK_DGRAM)
         self.__needs_ack = []
         self.__inbox = Queue()
-        self.__inbox_has_item = Semaphore(0)
         self.__inbox_worker_thread = Thread(target=self.__inbox_worker)
         self.__connections = []
         self.__connections_lock = Lock()
@@ -239,13 +235,11 @@ class Jamsocket:
                 # inbox and increment the expected sequence number
                 if seq == conn.expected_seq:
                     self.__inbox.put((data, from_address))
-                    self.__inbox_has_item.release()
                     conn.expected_seq += 1
             case DataNoAck(data):
                 # Add the packet to the inbox. No ack is needed for this packet
                 # type
                 self.__inbox.put((data, from_address))
-                self.__inbox_has_item.release()
             case Skip():
                 pass
             case Die():
@@ -432,10 +426,10 @@ class Jamsocket:
         provided and no data is available after that time, a TimeoutError is
         raised.
         """
-        success = self.__inbox_has_item.acquire(timeout=timeout)
-        if not success:
+        try:
+            return self.__inbox.get(timeout=timeout)
+        except:
             raise TimeoutError
-        return self.__inbox.get()
 
     def recv(self, timeout: float | None = None):
         """
