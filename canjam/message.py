@@ -68,8 +68,3 @@ class DelUser(Message):
 @dataclass
 class Die(Message):
     pass
-
-
-@dataclass
-class Die(Message):
-    pass
