@@ -128,3 +128,11 @@ class InboundWorkerTestCase(unittest.TestCase):
 
             worker.stop()
             self.assertEqual(worker.user_set, set([tyler]))
+
+    def test_bad_message(self):
+        """Test that receiving a poorly formatted message does not crash the
+        InboundWorker.
+        """
+        with Jamsocket(0) as sock, InboundWorker(sock, "Skylar") as worker:
+            sock.connect(sock.getsockname())
+            sock.sendto_reliably(b"bad message", sock.getsockname())

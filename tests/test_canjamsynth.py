@@ -3,7 +3,7 @@ import unittest
 from canjam.canjamsynth import CanJamSynth, SynthType
 
 
-class GameRunnerTest(unittest.TestCase):
+class CanjamSynthTest(unittest.TestCase):
 
     def test_create_canjamsynth(self):
         """Confirm that a CanJamSynth can properly initialize its py_audio
