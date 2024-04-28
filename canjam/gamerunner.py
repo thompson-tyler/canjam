@@ -1,19 +1,17 @@
 #  Note: NCS indicates Note, Color, Synth
 #  message format struct = (note:int, color:(int,int,int), synth:str)
 
+from dataclasses import dataclass
 import pygame
 from random import choice
 
-# this Queue will be changed once we have handoff from @skylar and @tyler
-from threading import Thread, Semaphore, Lock
+from threading import Thread, Semaphore
 from queue import Queue, Empty
 from time import sleep
 from canjam.canjamsynth import CanJamSynth
 
-# from canjam.logger import vprint
-from canjam.message import Message, Sound, Die, Color, SynthType, Cell
+from canjam.message import Message, Sound, Die, Color, SynthType
 from canjam.logger import vprint
-from canjam.jamsocket import address
 from canjam.outboundworker import OutQueueType
 
 WIDTH = 9
@@ -40,6 +38,12 @@ PLAYER_COLORS = [
 ]
 
 
+@dataclass
+class Cell:
+    coords: tuple[int, int]
+    color: Color
+
+
 class GameRunner:
     """A module that runs the CanJam game GUI using pygame."""
 
@@ -60,7 +64,7 @@ class GameRunner:
         vprint(f"Player {peer_num} is using synth {self.synth_type}")
 
         self.grid: list[list[tuple[int, int, int]]] = [
-            [Color.GRAY.value for _ in range(WIDTH)] for _ in range(WIDTH)
+            [Color.GRAY.value] * WIDTH for _ in range(WIDTH)
         ]
 
     def draw_grid(self, game_obj, screen):
@@ -90,7 +94,8 @@ class GameRunner:
         self.draw_grid(game_obj=pygame, screen=screen)
         pygame.display.flip()
 
-        sleep(0.05)  # TODO: why?
+        # Display the color for a short time before reverting to gray
+        sleep(0.05)
 
         self.draw_grid(game_obj=pygame, screen=screen)
         pygame.display.flip()
@@ -98,7 +103,12 @@ class GameRunner:
         self.grid[row][col] = Color.GRAY.value
 
     def sound_handler(self, color_queue: Queue[Cell]):
-        """ """
+        """
+        This function listens for Sound messages from the in_queue and plays
+        the corresponding note on the CanJamSynth object. It also enqueues a
+        color flash by putting a Cell object on the color_queue.
+        """
+        # Construct a dictionary of CanJamSynth objects for each SynthType
         synths = {
             synth_type: CanJamSynth(synth_type) for synth_type in SynthType
         }
@@ -107,7 +117,6 @@ class GameRunner:
             match self.in_queue.get():
                 case Die():
                     return
-                # TODO: play note with different synth from different user?
                 case Sound(note, color, synth_type):
                     synths[synth_type].play_note(note)
                     (row, col) = (note // WIDTH, note % WIDTH)

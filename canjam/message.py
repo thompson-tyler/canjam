@@ -8,10 +8,19 @@ from canjam.canjamsynth import SynthType
 
 class Message:
     def serialize(self) -> bytes:
+        """
+        Instance method to serialize a message object into bytes.
+        Uses the pickle module under the hood.
+        """
         return dumps(self)
 
     @staticmethod
     def deserialize(message: bytes) -> "Message":
+        """
+        Static method to deserialize a message object from bytes which were
+        serialized using the serialize method. If the provided bytes do not
+        represent a Message object, a ValueError is raised.
+        """
         m = loads(message)
         if not isinstance(m, Message):
             raise ValueError("Deserialized object is not a Message")
@@ -29,12 +38,6 @@ class Color(Enum):
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     GRAY = (200, 200, 200)
-
-
-@dataclass
-class Cell:
-    coords: tuple[int, int]
-    color: Color
 
 
 @dataclass

@@ -27,14 +27,13 @@ class OutboundWorker:
         self,
         sock: Jamsocket,
         name: str,
-        out_queue: OutQueueType,
-        user_set: set[User],
+        out_queue: OutQueueType | None = None,
+        user_set: set[User] | None = None,
     ):
         self.sock = sock
         self.name = name
-        self.user_set = user_set
-
-        self.out_queue = out_queue
+        self.user_set = user_set if user_set is not None else set()
+        self.out_queue = out_queue if out_queue is not None else Queue()
 
         self.__worker_thread = Thread(target=self.__worker_job)
 
@@ -59,7 +58,6 @@ class OutboundWorker:
                 case Die():
                     return
                 case Sound(_):
-                    vprint("Starting sound broadcast")
                     for user in self.user_set:
                         vprint(
                             f"Sending sound to {user.name} at {user.address}"

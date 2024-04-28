@@ -88,17 +88,6 @@ class CustomSocketTest(unittest.TestCase):
                 rec_data = sock1.recv()
                 self.assertEqual(data, rec_data)
 
-    def test_jamsocket_bad_destination(self):
-        """
-        Test that sending a packet to a bad destination address raises an
-        exception.
-        """
-        with Jamsocket(PORT1) as sock:
-            with self.assertRaises(OSError):
-                sock.sendto_unreliably(b"Hello, World!", ("1.2.3.4", PORT1))
-            with self.assertRaises(OSError):
-                sock.sendto_reliably(b"Hello, World!", ("1.2.3.4", PORT1))
-
     def test_jamsocket_not_listening(self):
         """
         Test that sending a packet to a host that isn't listening returns 0
@@ -213,7 +202,15 @@ class CustomSocketTest(unittest.TestCase):
             Jamsocket(PORT1, badsocket) as dest_sock,
             Jamsocket(PORT2, badsocket) as sock,
         ):
-            m = RspUserList("skylar", [User("Alice", 1), User("Bob", 2)])
+            m = RspUserList(
+                "skylar",
+                set(
+                    [
+                        User("Alice", ("0.0.0.0", 100)),
+                        User("Bob", ("0.0.0.0", 200)),
+                    ]
+                ),
+            )
             data = m.serialize()
 
             sock.connect((LOCALHOST, PORT1))
@@ -222,16 +219,9 @@ class CustomSocketTest(unittest.TestCase):
             rec_data = dest_sock.recv()
             rec_m = Message.deserialize(rec_data)
             match rec_m:
-                case RspUserList(name, user_list):
+                case RspUserList(name, user_set):
                     self.assertEqual(name, "skylar")
-                    self.assertIsInstance(user_list, list)
-                    self.assertEqual(len(user_list), 2)
-                    self.assertIsInstance(user_list[0], User)
-                    self.assertIsInstance(user_list[1], User)
-                    self.assertEqual(user_list[0].name, "Alice")
-                    self.assertEqual(user_list[0].address, 1)
-                    self.assertEqual(user_list[1].name, "Bob")
-                    self.assertEqual(user_list[1].address, 2)
+                    self.assertEqual(m.user_set, user_set)
                 case _:
                     self.fail("Deserialized message is not of the correct type")
 

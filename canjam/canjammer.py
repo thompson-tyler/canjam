@@ -131,34 +131,30 @@ class CanJammer:
         """Set up connection with other CanJam peers. If the user is joining
         another CanJam user's room, set up connections to all peers.
         NOTE: CanJammer should spawn and manage GameRunner, as all non-sound
-        pack handling is done by InboundWorker and OutboundWorker. Can't
-        remember: any state changes that _need_ to notify CanJammer to do
-        work for another thread?
+        pack handling is done by InboundWorker and OutboundWorker.
         """
 
         with Jamsocket(self.port) as sock:
             self.__bootstrap_connection(sock)
 
             with (
-                InboundWorker(
-                    sock, self.name, self.in_queue, self.user_set
-                ) as inbound_worker,
-                OutboundWorker(
-                    sock, self.name, self.out_queue, self.user_set
-                ) as outbound_worker,
+                InboundWorker(sock, self.name, self.in_queue, self.user_set),
+                OutboundWorker(sock, self.name, self.out_queue, self.user_set),
             ):
                 try:
-                    # TODO: start the GameRunner module
-                    game_runner = GameRunner(
+                    GameRunner(
                         self.in_queue, self.out_queue, len(self.user_set)
-                    )
-                    game_runner.run_game()
+                    ).run_game()
                 except KeyboardInterrupt:
                     pass
                 finally:
                     # Notify all connected peers that CanJam user is leaving
+                    # NOTE: despite outbound worker being stopped immediately
+                    # after we put these messages in the out_queue, it's
+                    # designed to finish sending all messages in the queue
+                    # before stopping, so we can be sure these messages will
+                    # be sent
                     del_user = DelUser(self.name)
-
                     for user in self.user_set:
-                        print("Sending", del_user, "to", user.address)
+                        vprint("Sending", del_user, "to", user.address)
                         self.out_queue.put((del_user, user.address))

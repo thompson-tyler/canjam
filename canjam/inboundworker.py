@@ -27,14 +27,14 @@ class InboundWorker:
         self,
         sock: Jamsocket,
         name: str,
-        in_queue: Queue[Message],
-        user_set: set[User]
+        in_queue: Queue[Message] | None = None,
+        user_set: set[User] | None = None,
     ):
         self.sock = sock
         self.name = name
 
-        self.in_queue = in_queue
-        self.user_set = user_set
+        self.in_queue = in_queue if in_queue is not None else Queue[Message]()
+        self.user_set = user_set if user_set is not None else set[User]()
 
         self.__worker_thread = Thread(target=self.__worker_job)
 
@@ -51,7 +51,7 @@ class InboundWorker:
             try:
                 message = Message.deserialize(data)
             except:
-                print("Failed to deserialize message from", address)
+                vprint("Failed to deserialize message from", address)
                 continue
             match message:
                 case ReqUserList():
@@ -64,17 +64,14 @@ class InboundWorker:
                     vprint("Received user list response from", address)
                     new_user_set.add(User(peer_name, address))
                     self.user_set.update(new_user_set)
-                    # self.notifier.release()
 
                 case NewUser(name):
                     vprint("New user", name, "from", address)
                     self.user_set.add(User(name, address))
-                    # self.notifier.release()
 
                 case DelUser(name):
                     vprint("User", name, "left the room")
                     self.user_set.remove(User(name, address))
-                    # self.notifier.release()
 
                 case Sound(sound):
                     vprint("Received sound", sound, "from", address)
@@ -84,7 +81,7 @@ class InboundWorker:
                     break
 
                 case _:
-                    print("Received unknown message type from", address)
+                    vprint("Received unknown message type from", address)
 
     def start(self):
         self.__worker_thread.start()

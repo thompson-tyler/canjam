@@ -11,12 +11,9 @@ class UserSerializationTest(unittest.TestCase):
         name length and address
         """
 
-        users = [User(str(i) * i, i) for i in range(50)]
+        users = [User(str(i) * i, ("0.0.0.0", i)) for i in range(50)]
         data = [u.serialize() for u in users]
-        for i in range(50):
-            u = User.deserialize(data[i])
-            self.assertEqual(u.name, str(i) * i)
-            self.assertEqual(u.address, i)
+        self.assertEqual([User.deserialize(d) for d in data], users)
 
     def test_bad_deserialize_users(self):
         """

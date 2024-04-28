@@ -1,16 +1,14 @@
 import unittest
 
-from canjam.message import Synth
-from canjam.gamerunner import GameRunner
-from canjam.canjamsynth import CanJamSynth
+from canjam.canjamsynth import CanJamSynth, SynthType
 
 
 class GameRunnerTest(unittest.TestCase):
 
-    def test_create_canjamsynth():
+    def test_create_canjamsynth(self):
         """Confirm that a CanJamSynth can properly initialize its py_audio
         and fluid_synth modules, and play a single note.
         """
-        player_synth = CanJamSynth(font=Synth.PIANO)
+        player_synth = CanJamSynth(font=SynthType.PIANO)
         d_note = 60
         player_synth.play_note(d_note)

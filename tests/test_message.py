@@ -8,14 +8,19 @@ from canjam.message import (
     RspUserList,
     NewUser,
     DelUser,
+    Color,
 )
-
 from canjam.user import User
+from canjam.gamerunner import SynthType
 
 
 class MessageSerializationTest(unittest.TestCase):
     def test_serialize_sound_message(self):
-        m = Sound(1)
+        m = Sound(
+            1,
+            Color.BLACK,
+            SynthType.BELLS,
+        )
         data = m.serialize()
         m2 = Message.deserialize(data)
         match m2:
@@ -31,22 +36,24 @@ class MessageSerializationTest(unittest.TestCase):
         self.assertIsInstance(m2, ReqUserList)
 
     def test_serialize_rsp_user_list_message(self):
-        m = RspUserList("Eve", [User("Alice", 1), User("Bob", 2)])
+        user_set = set()
+        tyler = User("Tyler", ("localhost", 100))
+        skylar = User("Skylar", ("localhost", 100))
+        user_set.add(tyler)
+        user_set.add(skylar)
+        m = RspUserList("Eve", user_set)
         data = m.serialize()
         m2 = Message.deserialize(data)
         match m2:
-            case RspUserList(name, user_list):
+            case RspUserList(name, user_set):
                 self.assertIsInstance(name, str)
                 self.assertEqual(name, "Eve")
 
-                self.assertIsInstance(user_list, list)
-                self.assertEqual(len(user_list), 2)
-                self.assertIsInstance(user_list[0], User)
-                self.assertIsInstance(user_list[1], User)
-                self.assertEqual(user_list[0].name, "Alice")
-                self.assertEqual(user_list[0].address, 1)
-                self.assertEqual(user_list[1].name, "Bob")
-                self.assertEqual(user_list[1].address, 2)
+                self.assertIsInstance(user_set, set)
+                self.assertEqual(len(user_set), 2)
+                for user in user_set:
+                    self.assertIsInstance(user, User)
+                    self.assertTrue(user in user_set)
             case _:
                 self.fail("Deserialized message is not of the correct type")
 
