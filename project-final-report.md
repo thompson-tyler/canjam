@@ -9,6 +9,8 @@ Roger Burtonpatel, Cece Crumlish, Skylar Gilfeather, Tyler Thompson
   - [Design](#design)
   - [Outcome Analysis](#outcome-analysis)
   - [Design Reflection](#design-reflection)
+    - [CanJam Canvas](#canjam-canvas)
+    - [Peer to Peer Model](#peer-to-peer-model)
     - [Pygame Module (Cece and Roger)](#pygame-module-cece-and-roger)
   - [Division of Labor](#division-of-labor)
   - [Bug Report](#bug-report)
@@ -16,6 +18,8 @@ Roger Burtonpatel, Cece Crumlish, Skylar Gilfeather, Tyler Thompson
     - [Driver Script](#driver-script)
     - [Testing](#testing)
 
+
+## Minimum Viable Project: Outcome and Analysis
 
 ## Design Reflection
 
