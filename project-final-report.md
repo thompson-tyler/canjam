@@ -15,7 +15,7 @@ Roger Burtonpatel, Cece Crumlish, Skylar Gilfeather, Tyler Thompson
   - [Outcome Analysis](#outcome-analysis)
   - [Design Reflection](#design-reflection)
     - [Pygame Module (Cece and Roger)](#pygame-module-cece-and-roger)
-  - [Division of Labor](#division-of-labor)
+  - [Delegation Reflection](#delegation-reflection)
   - [Bug Report](#bug-report)
   - [Code Overview](#code-overview)
     - [Driver Script](#driver-script)
@@ -84,9 +84,57 @@ Initially I (Cece) thought it would be more beneficial and faster to use multipl
 
 **If we had had more time:** I think we would have experimented with different concurrent solutions to the displaying multiple sounds at once problem we had. However we were so spread-thin with getting the pyfluidsynth and pygame to work, that we ran out of time, and didn't get to that part.
 
-## Division of Labor
+## Delegation Reflection
+
+We divided our project between the high-level concurrent monitor & networked
+system and the low-level music module. Skylar and Tyler tackled the former; Cece
+and Roger tackled the latter. We united our design under a very specific and
+unified spec. We all contributed equally to this design, which Roger built
+the framework for over break.
+
+This was a very good choice. Skylar and Tyler are very strong in networked
+programming, and came up with an excellent peer-to-peer model. The team put a
+lot of trust in them to build something that would be compatible with the spec
+of the music module when we combined the two, and they did exactly that:
+integration was seamless. Cece and Roger built the music module to exactly match
+this spec, and were able to tackle challenges on the implementation level while
+leaving the interface untouched.
+
+On the individual level, Cece assertively took the lead in building the majority
+of the music module. Roger contributed supporting work, including refinements to
+design, debugging, library discovery, demo code, and pair programming. Tyler
+wrote the TSocket code, and Skylar wrote the Inbound/Outbound workers code and
+spearheaded integration. The whole team helped to complete integration, which,
+due to our design, was a short process.
+
+Overall, we demonstrated thoughtful and effective division of labor. Each team
+member was able to exhibit their own skill set, and unifying our design under a
+single spec made integration easy. I would work with this team again in the
+future.
 
 ## Bug Report
+
+Due to venv and global inconsistencies, getting the `pyfluidsynth` module to
+recognize the `fluidsynth` library was very difficult. `fluidsynth` had to be
+installed with `brew`, while `pyfluidsynth` was under a local venv or conda
+environment. Python locates libraries differently under a venv, so it could not
+find `fluidsynth` if we ran the program in one. This manifested in a
+compile-time error that was very difficult to debug, because it occurred in
+library code we hadn't written.
+
+To find it, we used classic debugging techniques: starting by visually combing
+our own codebase, and when that failed, copying the error message into Stack
+Overflow. Fortunately, [Stack Overflow](https://stackoverflow.com/questions/62478717/importerrorcouldnt-find-the-fluidsynth-library)
+gave a solution, which helped somewhat, but was not a permanent solution because
+it was non-portable. We ran into more issues with this, down to architecture and
+versioning of the libraries themselves. We finally resolved this by installing a
+very careful subset of the packages globally. This was the least-messy way to
+get the program to work, although Roger believes it has damaged his python
+installation in ways he is not yet aware of.
+
+It is not clear if we could have found this bug faster. We all collaborated to
+try to fix it, and only through combined effort did we solve it. The only thing
+we can think of as an answer to this question is “type faster.”
 
 ## Code Overview
 
