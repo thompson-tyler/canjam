@@ -1,0 +1,1 @@
+{"rule":"EN_UNPAIRED_BRACKETS","sentence":"^\\QThe only thing we can think of as an answer to this question is \"type faster.”\\E$"}

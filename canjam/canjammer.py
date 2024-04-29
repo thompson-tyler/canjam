@@ -2,7 +2,6 @@ from queue import Queue
 from time import time
 from socket import gethostname, gethostbyname_ex
 from argparse import Namespace
-from threading import Semaphore
 
 from canjam.jamsocket import Jamsocket, address
 from canjam.inboundworker import InboundWorker
@@ -14,7 +13,6 @@ from canjam.message import (
     RspUserList,
     NewUser,
     DelUser,
-    Die,
 )
 from canjam.user import User
 from canjam.logger import vprint, set_verbose
@@ -44,8 +42,6 @@ class CanJammer:
         self.in_queue = Queue()
         self.out_queue = Queue()
         self.user_set = set()
-
-        self.notifier = Semaphore(0)
 
     def __bootstrap_connection(self, sock: Jamsocket):
         """Set up CanJammer's user_set: if the user is joining another
