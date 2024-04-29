@@ -6,6 +6,11 @@ Roger Burtonpatel, Cece Crumlish, Skylar Gilfeather, Tyler Thompson
 
 - [Project Final Report: Canjam](#project-final-report-canjam)
   - [Table of Contents](#table-of-contents)
+  - [Project Proposal](#project-proposal)
+    - [Minimum Deliverables](#minimum-deliverables)
+    - [Maximum Deliverables](#maximum-deliverables)
+    - [Foreseeable challenges](#foreseeable-challenges)
+    - [First Step](#first-step)
   - [Design](#design)
   - [Outcome Analysis](#outcome-analysis)
   - [Design Reflection](#design-reflection)
@@ -15,6 +20,40 @@ Roger Burtonpatel, Cece Crumlish, Skylar Gilfeather, Tyler Thompson
   - [Code Overview](#code-overview)
     - [Driver Script](#driver-script)
     - [Testing](#testing)
+
+## Project Proposal
+
+We propose the game **CanJam**.
+
+**CanJam** is a multiplayer melody maker that allows users to play music with each other across multiple laptop instances. We were inspired by the Chrome Music Lab Melody Maker. Our goal with this project is to build a fun, colorful and fun-to-play visual interface, including different musical instruments.
+
+### Minimum Deliverables
+
+1. Basic Sound Modulation and playback via Pyaudio using the Pyfluidsynth library.
+2. Tiles that sound varying in pitch, no vertical volume or timbre axis.
+3. Single instrument sound type available.
+4. Users are assigned a default color and the user's active tile is highlighted with color.
+5. Users Play peer sounds as soon as they arrive with no conception of preserving accurate time delay from network delay.
+6. Users capable of playing the game with themselves, and connecting to each other's sessions over a Peer-peer server.
+7. `<=` 4 users in a single room.
+
+### Maximum Deliverables
+
+1. `>` 4 players in a room.
+2. Visual noise animations, like sparkles, or explode on the grid.
+3. More modulators added, such as timbre and volume.
+4. More instruments loaded in.
+5. A globally looping drum track.
+
+### Foreseeable challenges
+
+One of the biggest foreseeable challenges with this project is getting the synths to play nice and work together. As we saw in our initial experiments, playing different synths on the same computer will require some switching between modules and maneuvering handled by the audio driver which may prove to be a limiting factor in the amount of different instruments playing in a single room that we will be able to support at a given time.  
+
+### First Step
+
+Get the music GUI to work: support mouse-over activation of a tiled grid of buttons that each play a note from a particular soundfont loaded onto a synth object by the CanJamSynth module.
+
+This was the logical first step for our project since pygame and playing sounds was the most foreign, mysterious piece of the project. We wanted to make sure it was all possible before proceeding with the rest of the project.
 
 ## Design
 
