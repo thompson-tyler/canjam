@@ -9,6 +9,7 @@ Roger Burtonpatel, Cece Crumlish, Skylar Gilfeather, Tyler Thompson
   - [Design](#design)
   - [Outcome Analysis](#outcome-analysis)
   - [Design Reflection](#design-reflection)
+    - [Pygame Module (Cece and Roger)](#pygame-module-cece-and-roger)
   - [Division of Labor](#division-of-labor)
   - [Bug Report](#bug-report)
   - [Code Overview](#code-overview)
@@ -20,6 +21,18 @@ Roger Burtonpatel, Cece Crumlish, Skylar Gilfeather, Tyler Thompson
 ## Outcome Analysis
 
 ## Design Reflection
+
+### Pygame Module (Cece and Roger)
+
+To be honest this module went through a lot of changes from the initial design. As we began to work more with pygame.
+
+**One thing I feel particularly proud of is:** the inter-game process communication and getting everything to work in terms of updating the board visually with inbound sounds and sending outbound sounds to the correct modules. Additionally, having the game module abstracted from the process of joining a room and talking to other players was really helpful in getting everything to connect seamlessly, once the Peer-Peer portion was completed.
+
+**One thing I wish I would have done differently though was to do more reading up on multiprocessing vs. multithreading:**
+
+Initially I (Cece) thought it would be more beneficial and faster to use multiple processes with pygame as I thought it would allow for actual concurrency with the audio driver. But as it turns out inter-process communication is very slow and all the message passing and note playing on each process I was doing in that version was being hindered by how slow over the network communication was.
+
+**If we had had more time:** I think we would have experimented with different concurrent solutions to the displaying multiple sounds at once problem we had. However we were so spread-thin with getting the pyfluidsynth and pygame to work, that we ran out of time, and didn't get to that part.
 
 ## Division of Labor
 
@@ -39,13 +52,13 @@ The Canjam program is started by running `run.py`. It's purpose is to parse comm
 
 The driver program accepts the following command line arguments:
 
-1. `-n|--name NAME`: The name to use when joining a room. This argument is required and the value should be a string.
+1. `-n NAME, --name NAME`: The name to use when joining a room. This argument is required and the value should be a string.
 
-2. `-j|--join HOST:PORT`: Join a room by specifying the address of someone in the room. If not specified, a new empty room will be created. `HOST` must be a reachable IP address of someone in a Canjam room, and `PORT` is the port they're listening on.
+2. `-j HOST:PORT, --join HOST:PORT`: Join a room by specifying the address of someone in the room. If not specified, a new empty room will be created. `HOST` must be a reachable IP address of someone in a Canjam room, and `PORT` is the port they're listening on.
 
-3. `-p|--port PORT`: The port to use for internet communication. If not specified, then one will be auto-assigned.
+3. `-p PORT, --port PORT`: The port to use for internet communication. If not specified, then one will be auto-assigned.
 
-4. `-v|--verbose`: If this flag is present, Canjam will print more information to the console. This argument does not require a value.
+4. `-v, --verbose`: If this flag is present, Canjam will print more information to the console. This argument does not require a value.
 
 ### Testing
 
