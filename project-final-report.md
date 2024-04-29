@@ -21,17 +21,47 @@ Roger Burtonpatel, Cece Crumlish, Skylar Gilfeather, Tyler Thompson
 
 ## Minimum Viable Project: Outcome and Analysis
 
+The minimum functionality deliverables for CanJam required that CanJam be able
+display unique colors and play unique synth sounds for each user interacting
+with the canvas. This goal was achieved, although CanJam only supports four
+different synth types, due to performance challenges in generating multiple
+`pyfluidsynth` synth object at once. In the future, adapting the synth generation
+process to use just one synth objects, or using a different sound generation
+library entirely, could eliminate this bottleneck on the number of possible sounds.
+
+Additionally, our minimum functionality deliverables for the larger CanJam
+system design required that users be able to spin up a CanJam canvas
+independently of any central server. In the CanJam peer-to-peer model, users
+manage setup communications and share sound packets with their peers in a 
+connected cluster of CanJam users. Our requirements outlined that CanJam
+should support multiplayer clusters of minimally two users, and this was
+achieved. However, because CanJam peers share sounds by unreliably broadcasting
+large batches of small Sound packets, it was difficult to achieve the illusion
+of continuously playing sound on the user end. On a user's local canvas,
+this resulted in choppy sound and flickering color activation when displaying
+a peer's activity on the canvas. However, despite this drawback, our testing
+showed that at least six CanJam users could collaboratively play on the same
+canvas with no increase in these performance issues when playing a peer's
+incoming sounds.
+
+Additional maximum functionality goals for CanJam involved generating animated
+"trail" effects for user cursors on the canvas, varying sounds by timbre or
+volume on the vertical axis of the grid, and playing a looping drum track
+on each user canvas to serve as a metronome. While we were not able to achieve
+any of these goals, they are all possible with the current libraries and
+CanJam program infrastructure, and could be feasibly implemented with more time.
+
 ## Design Reflection
 
 ### CanJam Canvas
-To recap: CanJam allows users to play music on a collaborative grid of notes. When clicking and holding, their current cell activates with their color and rings with its note. The barebones canvas GUI, a grid of music tiles, was designed to be intuitively playful and allow for freeform musical experimentation. Barring the latency issues in practice, the visual layout really gives users the convincing experience of playing sounds together on the same canvas.
+CanJam allows users to play music on a collaborative grid of notes. When clicking and holding, their current cell activates with their color and rings with its note. The barebones canvas GUI, a grid of music tiles, was designed to be intuitively playful and allow for freeform musical experimentation. Barring the latency issues in practice, the visual layout really gives users the convincing experience of playing sounds together on the same canvas.
 
 The original MVP called for a grid with sounds that varied by pitch on the horizontal axis, and by volume on the vertical axis. Although the final MVP only varies notes by pitch, this proved to be a simpler musical interface: users can jump octaves by row, and glide across nodes by column. However, inconsistencies in the sound fonts used to generate synth notes made it difficult to create smooth pitch ranges. Some sound fonts are naturally pitched higher than others; which, in combination with a particularly large grid, result in the highest and lowest tiles generating inaudible pitches.   
 
-Additionally, while the MVP describes users having their own unique color, users may have the same color or synth type, because no central server assigns specific colors and synth types to each user. Furthermore, the `CanJamSynth` module only supports a limited number of synth types, due to limitations in the number of workable sound font files that could be found. Having "identical" users in a room isn't necessary a technical problem, although it may confuse other peers on the same canvas. To address this in the future, a user could potentially assign each of its neighboring peers a unique _relative_ color and sound. Or, peer clusters could deny new user requests from a user with a name already in the peer cluster user list.
+Additionally, while the MVP describes users having their own unique color, users may have the same color or synth type, because no central server assigns specific colors and synth types to each user. Furthermore, the `CanJamSynth` module only supports a limited number of synth types, due to performance drawbacks of loading multiple sound font files into memory at once. Having "identical" users in a room isn't necessary a technical problem, although it may confuse other peers on the same canvas. To address this in the future, a user could potentially assign each of its neighboring peers a unique _relative_ color and sound. Or, peer clusters could deny new user requests from a user with a name already in the peer cluster user list.
 
 ### Peer to Peer Model
-Furthermore, CanJam's peer-to-peer model, which lets users create freeform clusters of peers playing on the same canvas, allows CanJam a great deal of flexibility. While the peer-to-peer design was introduced as a fun pedagogical exercise, it ended up making multiplayer CanJam easy to initiate and resilient to individual failures. No central server is needed to spawn collaborative CanJam canvases, because each user runs their own CanJam instance independently. And, each CanJam user stores its own list of all its connected peers: so, users can spawn large-scale multiplayer canvases whenever they want. And, the peer-to-peer model also preserves CanJam canvases for remaining users when the founding member of the cluster has left. The peer-to-peer model wasn't chosen with the goal of handling expoentnial usership growth; but, on the other hand, it means that any user can create a multiplayer canvas whenever they want.
+Furthermore, CanJam's peer-to-peer model, which lets users create freeform clusters of peers playing on the same canvas, allows CanJam a great deal of flexibility. While the peer-to-peer design was introduced as a fun pedagogical exercise, it ended up making multiplayer CanJam easy to initiate and resilient to individual failures. No central server is needed to spawn collaborative CanJam canvases, because each user runs their own CanJam instance independently. And, each CanJam user stores its own list of all its connected peers: so, users can spawn large-scale multiplayer canvases whenever they want. And, the peer-to-peer model also preserves CanJam canvases for remaining users when the founding member of the cluster has left. The peer-to-peer model wasn't chosen with the goal of handling expoentnial usership growth; but, on the other hand, it means that any user can create a multiplayer canvas whenever they want. 
 
 
 ### Pygame Module (Cece and Roger)
