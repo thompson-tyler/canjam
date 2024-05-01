@@ -7,7 +7,11 @@ Roger Burtonpatel, Cecelia Crumlish, Skylar Gilfeather, Tyler Thompson
 to install the `FluidSynth` C library. Follow the instructions in the
 [FluidSynth GitHub repository](https://github.com/FluidSynth/fluidsynth/wiki/Download#distributions) to install `FluidSynth` on your machine using your favorite package manager.
 
-Then, you can install the `canjam` requirements via `pip3 install -r requirements.txt`
+Then, you can install the `canjam` requirements via `pip3 install -r requirements.txt`.
+On some machines, Python3.12 cannot find the C bindings for the FluidSynth library
+when `CanJam` is run within a virtual environment. If this is the case, you'll
+unfortunately have to install the following packages systemwide by appending
+with the argument `--break-system packages`, i.e. `pip3 install -r requirements.txt --break-system packages`
 
 ```
 pip3 install numpy
@@ -16,8 +20,8 @@ pip3 install pyaudio
 pip3 install pyfluidsynth
 ```
 
-To run `canjam`, run `python3 run.py`. The `canjam` executable takes the
-following arguments:
+To run `canjam`, navigate to the root directory, `canjam`, and run `python3 run.py`.
+The `canjam` executable takes the following arguments:
 
 `-n / --name [NAME]`: Your displayed name to other CanJam peers.
 

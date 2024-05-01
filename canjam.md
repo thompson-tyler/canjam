@@ -1,6 +1,6 @@
 # CanJam
 
-![Canjam running with three users simultaneously sharing sound](summary-image.png)
+![Canjam running with three users simultaneously sharing sound](images/summary-image.png)
 
 ## About
 
