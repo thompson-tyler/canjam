@@ -18,6 +18,7 @@ Roger Burtonpatel, Cece Crumlish, Skylar Gilfeather, Tyler Thompson
     - [Peer to Peer Model](#peer-to-peer-model)
     - [Pygame Module (Cece and Roger)](#pygame-module-cece-and-roger)
   - [Delegation Reflection](#delegation-reflection)
+  - [Installation Instructions](#installation-instructions)
   - [Bug Report](#bug-report)
   - [Code Overview](#code-overview)
     - [Driver Script](#driver-script)
@@ -171,6 +172,29 @@ Overall, we demonstrated thoughtful and effective division of labor. Each team
 member was able to exhibit their own skill set, and unifying our design under a
 single spec made integration easy. I would work with this team again in the
 future.
+
+## Installation Instructions
+
+`canjam` requires Python >= 3.12. After cloning this repository, you'll need to install the `FluidSynth` C library. Follow the instructions in the [FluidSynth GitHub repository](https://github.com/FluidSynth/fluidsynth/wiki/Download#distributions) to install `FluidSynth` on your machine using your favorite package manager.
+
+Then, you can install the `canjam` requirements via `pip3 install -r requirements.txt`. On some machines, Python3.12 cannot find the C bindings for the FluidSynth library when `CanJam` is run within a virtual environment. If this is the case, you'll unfortunately have to install the following packages systemwide by appending with the argument `--break-system packages`, i.e. `pip3 install -r requirements.txt --break-system packages`
+
+```
+pip3 install numpy
+pip3 install pygame
+pip3 install pyaudio
+pip3 install pyfluidsynth
+```
+
+To run `canjam`, navigate to the root directory, `canjam`, and run `python3 run.py`. The `canjam` executable takes the following arguments:
+
+`-n / --name [NAME]`: Your displayed name to other CanJam peers (required).
+
+`-j / --join [HOST:PORT]`: The hostname and port of another CanJam user, to join their CanJam canvas. If not specified, then a new room will be created.
+
+`-p / --port [PORT]`: The port that your CanJam program should use for internet communication. If `-p` is not specified, the OS will assign you one.
+
+`-v / --verbose`: Verbosity flag, to print debugging messages to the console.
 
 ## Bug Report
 
