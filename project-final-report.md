@@ -21,7 +21,7 @@ Roger Burtonpatel, Cece Crumlish, Skylar Gilfeather, Tyler Thompson
   - [Bug Report](#bug-report)
   - [Code Overview](#code-overview)
     - [Driver Script](#driver-script)
-    - [The CanJam Modules](#the-canjam-modules)
+    - [CanJam Module Design](#the-canjam-modules)
       - [`canjammer`](#canjammer)
       - [`gamerunner`](#gamerunner)
       - [`canjamsynth`](#canjamsynth)
@@ -101,6 +101,25 @@ on each user canvas to serve as a metronome. While we were not able to achieve
 any of these goals, they are all possible with the current libraries and
 CanJam program infrastructure, and could be feasibly implemented with more time.
 
+### System Architecture
+The CanJam architecture consists of three primary components, each running on a unique thread: the GameRunner, InboundWorker, and OutboundWorker. These components communicate by producing and consuming Message objects via shared thread-safe queues. These threads are managed by a driving CanJammer component, which maintains a shared UDP socket for the InboundWorker and OutboundWorker.
+
+The **CanJammer** is the driver component that initializes the InboundWorker, GameRunner, and OutboundWorker component threads, which communicate via its shared thread-safe Message queues. If the user is connecting to another CanJam peer, it also performs TSocket setup and initalizes its UserList through a bootstrap "handshake" of ReqUserList, RspUserList, and NewUser Messages with the connected peer. 
+
+The **InboundWorker** is a communication component that receives incoming packets from other CanJam peers on the shared TSocket, and deserializes them into Message objects. It puts incomding Sound Messages on the inQueue for the GameRunner to process and play. And, it handles NewUser and DelUser packets directly by updating the CanJammer's internal UserList.
+
+The **OutboundWorker** is a communication component that serializes Sound Messages into packets, and broadcasts them to all connected Canjam peers on the shared TSocket.
+
+The **GameRunner** is a functional game component that runs the CanJam canvas. It spawns an additional internal sound thread to play synth sounds, while the main thread handles user input and updates the pygame GUI.
+
+![system_module_design](images/overall-design.png)
+
+The **JamSocket** is a monitor wrapper component for Python’s `socket.socket`. It provides a thread-safe shared UDP socket for sending Messages, with the options to send packets both reliabily and unreliably, handling acknowledgements
+and sequence numbers under the hood to maintain unique communication sessions with each peer.
+
+![jamsocket_design](images/jamsocket-design.png)
+
+
 ## Design Reflection
 
 ### CanJam Canvas
@@ -112,7 +131,6 @@ Additionally, while the MVP describes users having their own unique color, users
 
 ### Peer to Peer Model
 Furthermore, CanJam's peer-to-peer model, which lets users create freeform clusters of peers playing on the same canvas, allows CanJam a great deal of flexibility. While the peer-to-peer design was introduced as a fun pedagogical exercise, it ended up making multiplayer CanJam easy to initiate and resilient to individual failures. No central server is needed to spawn collaborative CanJam canvases, because each user runs their own CanJam instance independently. And, each CanJam user stores its own list of all its connected peers: so, users can spawn large-scale multiplayer canvases whenever they want. And, the peer-to-peer model also preserves CanJam canvases for remaining users when the founding member of the cluster has left. The peer-to-peer model wasn't chosen with the goal of handling expoentnial usership growth; but, on the other hand, it means that any user can create a multiplayer canvas whenever they want. 
-
 
 ### Pygame Module (Cece and Roger)
 
