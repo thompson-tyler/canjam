@@ -11,8 +11,8 @@ Roger Burtonpatel, Cece Crumlish, Skylar Gilfeather, Tyler Thompson
     - [Maximum Deliverables](#maximum-deliverables)
     - [Foreseeable challenges](#foreseeable-challenges)
     - [First Step](#first-step)
-  - [Design](#design)
-  - [Outcome Analysis](#outcome-analysis)
+  - [Minimum Viable Project: Outcome and Analysis](#minimum-viable-project-outcome-and-analysis)
+    - [System Architecture](#system-architecture)
   - [Design Reflection](#design-reflection)
     - [CanJam Canvas](#canjam-canvas)
     - [Peer to Peer Model](#peer-to-peer-model)
@@ -21,7 +21,7 @@ Roger Burtonpatel, Cece Crumlish, Skylar Gilfeather, Tyler Thompson
   - [Bug Report](#bug-report)
   - [Code Overview](#code-overview)
     - [Driver Script](#driver-script)
-    - [CanJam Module Design](#the-canjam-modules)
+    - [The CanJam Modules](#the-canjam-modules)
       - [`canjammer`](#canjammer)
       - [`gamerunner`](#gamerunner)
       - [`canjamsynth`](#canjamsynth)
@@ -38,11 +38,11 @@ Roger Burtonpatel, Cece Crumlish, Skylar Gilfeather, Tyler Thompson
 
 We propose the game **CanJam**.
 
-**CanJam** is a multiplayer melody maker that allows users to play music with each other across multiple laptop instances. We were inspired by the Chrome Music Lab Melody Maker. Our goal with this project is to build a fun, colorful and fun-to-play visual interface, including different musical instruments.
+**CanJam** is a multiplayer melody maker that allows users to play music with each other across multiple laptop instances. We were inspired by the [Chrome Music Lab Melody Maker](https://musiclab.chromeexperiments.com/Melody-Maker/). Our goal with this project is to build a fun, colorful and fun-to-play visual interface, including different musical instruments.
 
 ### Minimum Deliverables
 
-1. Basic Sound Modulation and playback via Pyaudio using the Pyfluidsynth library.
+1. Basic Sound Modulation and playback via [Pyaudio](https://people.csail.mit.edu/hubert/pyaudio/) using the [Pyfluidsynth](https://github.com/nwhitehead/pyfluidsynth) library.
 2. Tiles that sound varying in pitch, no vertical volume or timbre axis.
 3. Single instrument sound type available.
 4. Users are assigned a default color and the user's active tile is highlighted with color.
@@ -68,7 +68,6 @@ Get the music GUI to work: support mouse-over activation of a tiled grid of butt
 
 This was the logical first step for our project since pygame and playing sounds was the most foreign, mysterious piece of the project. We wanted to make sure it was all possible before proceeding with the rest of the project.
 
-
 ## Minimum Viable Project: Outcome and Analysis
 
 The minimum functionality deliverables for CanJam required that CanJam be able
@@ -82,7 +81,7 @@ library entirely, could eliminate this bottleneck on the number of possible soun
 Additionally, our minimum functionality deliverables for the larger CanJam
 system design required that users be able to spin up a CanJam canvas
 independently of any central server. In the CanJam peer-to-peer model, users
-manage setup communications and share sound packets with their peers in a 
+manage setup communications and share sound packets with their peers in a
 connected cluster of CanJam users. Our requirements outlined that CanJam
 should support multiplayer clusters of minimally two users, and this was
 achieved. However, because CanJam peers share sounds by unreliably broadcasting
@@ -102,35 +101,36 @@ any of these goals, they are all possible with the current libraries and
 CanJam program infrastructure, and could be feasibly implemented with more time.
 
 ### System Architecture
+
 The CanJam architecture consists of three primary components, each running on a unique thread: the GameRunner, InboundWorker, and OutboundWorker. These components communicate by producing and consuming Message objects via shared thread-safe queues. These threads are managed by a driving CanJammer component, which maintains a shared UDP socket for the InboundWorker and OutboundWorker.
 
-The **CanJammer** is the driver component that initializes the InboundWorker, GameRunner, and OutboundWorker component threads, which communicate via its shared thread-safe Message queues. If the user is connecting to another CanJam peer, it also performs TSocket setup and initalizes its UserList through a bootstrap "handshake" of ReqUserList, RspUserList, and NewUser Messages with the connected peer. 
+The [**CanJammer**](#canjammer) is the driver component that initializes the InboundWorker, GameRunner, and OutboundWorker component threads, which communicate via its shared thread-safe Message queues. If the user is connecting to another CanJam peer, it also performs JamSocket setup and initializes its UserList through a bootstrap "handshake" of ReqUserList, RspUserList, and NewUser Messages with the connected peer.
 
-The **InboundWorker** is a communication component that receives incoming packets from other CanJam peers on the shared TSocket, and deserializes them into Message objects. It puts incomding Sound Messages on the inQueue for the GameRunner to process and play. And, it handles NewUser and DelUser packets directly by updating the CanJammer's internal UserList.
+The [**InboundWorker**](#inboundworker) is a communication component that receives incoming packets from other CanJam peers on the shared TSocket, and deserializes them into Message objects. It puts incoming Sound Messages on the inQueue for the GameRunner to process and play. And, it handles NewUser and DelUser packets directly by updating the CanJammer's internal UserList.
 
-The **OutboundWorker** is a communication component that serializes Sound Messages into packets, and broadcasts them to all connected Canjam peers on the shared TSocket.
+The [**OutboundWorker**](#inboundworker) is a communication component that serializes Sound Messages into packets, and broadcasts them to all connected Canjam peers on the shared TSocket.
 
-The **GameRunner** is a functional game component that runs the CanJam canvas. It spawns an additional internal sound thread to play synth sounds, while the main thread handles user input and updates the pygame GUI.
+The [**GameRunner**](#gamerunner) is a functional game component that runs the CanJam canvas. It spawns an additional internal sound thread to play synth sounds, while the main thread handles user input and updates the pygame GUI.
 
-![system_module_design](images/overall-design.png)
+![System Module Design](images/overall-design.png)
 
-The **JamSocket** is a monitor wrapper component for Python’s `socket.socket`. It provides a thread-safe shared UDP socket for sending Messages, with the options to send packets both reliabily and unreliably, handling acknowledgements
-and sequence numbers under the hood to maintain unique communication sessions with each peer.
+The [**JamSocket**](#jamsocket) is a monitor wrapper component for Python’s `socket.socket`. It provides a thread-safe shared UDP socket for sending Messages, with the options to send packets both reliability and unreliably, handling acknowledgements and sequence numbers under the hood to maintain unique communication sessions with each peer
 
-![jamsocket_design](images/jamsocket-design.png)
-
+![Jamsocket Design](images/jamsocket-design.png)
 
 ## Design Reflection
 
 ### CanJam Canvas
+
 CanJam allows users to play music on a collaborative grid of notes. When clicking and holding, their current cell activates with their color and rings with its note. The barebones canvas GUI, a grid of music tiles, was designed to be intuitively playful and allow for freeform musical experimentation. Barring the latency issues in practice, the visual layout really gives users the convincing experience of playing sounds together on the same canvas.
 
-The original MVP called for a grid with sounds that varied by pitch on the horizontal axis, and by volume on the vertical axis. Although the final MVP only varies notes by pitch, this proved to be a simpler musical interface: users can jump octaves by row, and glide across nodes by column. However, inconsistencies in the sound fonts used to generate synth notes made it difficult to create smooth pitch ranges. Some sound fonts are naturally pitched higher than others; which, in combination with a particularly large grid, result in the highest and lowest tiles generating inaudible pitches.   
+The original MVP called for a grid with sounds that varied by pitch on the horizontal axis, and by volume on the vertical axis. Although the final MVP only varies notes by pitch, this proved to be a simpler musical interface: users can jump octaves by row, and glide across nodes by column. However, inconsistencies in the sound fonts used to generate synth notes made it difficult to create smooth pitch ranges. Some sound fonts are naturally pitched higher than others; which, in combination with a particularly large grid, result in the highest and lowest tiles generating inaudible pitches.
 
 Additionally, while the MVP describes users having their own unique color, users may have the same color or synth type, because no central server assigns specific colors and synth types to each user. Furthermore, the `CanJamSynth` module only supports a limited number of synth types, due to performance drawbacks of loading multiple sound font files into memory at once. Having "identical" users in a room isn't necessary a technical problem, although it may confuse other peers on the same canvas. To address this in the future, a user could potentially assign each of its neighboring peers a unique _relative_ color and sound. Or, peer clusters could deny new user requests from a user with a name already in the peer cluster user list.
 
 ### Peer to Peer Model
-Furthermore, CanJam's peer-to-peer model, which lets users create freeform clusters of peers playing on the same canvas, allows CanJam a great deal of flexibility. While the peer-to-peer design was introduced as a fun pedagogical exercise, it ended up making multiplayer CanJam easy to initiate and resilient to individual failures. No central server is needed to spawn collaborative CanJam canvases, because each user runs their own CanJam instance independently. And, each CanJam user stores its own list of all its connected peers: so, users can spawn large-scale multiplayer canvases whenever they want. And, the peer-to-peer model also preserves CanJam canvases for remaining users when the founding member of the cluster has left. The peer-to-peer model wasn't chosen with the goal of handling expoentnial usership growth; but, on the other hand, it means that any user can create a multiplayer canvas whenever they want. 
+
+Furthermore, CanJam's peer-to-peer model, which lets users create freeform clusters of peers playing on the same canvas, allows CanJam a great deal of flexibility. While the peer-to-peer design was introduced as a fun pedagogical exercise, it ended up making multiplayer CanJam easy to initiate and resilient to individual failures. No central server is needed to spawn collaborative CanJam canvases, because each user runs their own CanJam instance independently. And, each CanJam user stores its own list of all its connected peers: so, users can spawn large-scale multiplayer canvases whenever they want. And, the peer-to-peer model also preserves CanJam canvases for remaining users when the founding member of the cluster has left. The peer-to-peer model wasn't chosen with the goal of handling exponential user growth; but, on the other hand, it means that any user can create a multiplayer canvas whenever they want.
 
 ### Pygame Module (Cece and Roger)
 
@@ -247,7 +247,7 @@ The `GameRunner` class is used by the [`CanJammer`](#canjammer) class to run the
 
 #### `canjamsynth`
 
-The `canjam.canjamsynth` module provides the `CanJamSynth` class, which is responsible for generating and playing sound data for the CanJam game. It uses the `numpy`, `pyaudio`, and `fluidsynth` libraries to generate and play sounds. It provides a method to play a note, which generates the sound, plays it, and then stops the note. Multiple sound fonts are supported, which can be selected when creating an instance of the class.
+The `canjam.canjamsynth` module provides the `CanJamSynth` class, which is responsible for generating and playing sound data for the CanJam game. It uses the `numpy`, [`pyaudio`](https://people.csail.mit.edu/hubert/pyaudio/), and `fluidsynth` libraries to generate and play sounds. It provides a method to play a note, which generates the sound, plays it, and then stops the note. Multiple sound fonts are supported, which can be selected when creating an instance of the class.
 
 The `CanJamSynth` class is used by the [`GameRunner`](#gamerunner) class to generate sound based on the game state.
 
@@ -272,7 +272,7 @@ Key features of the `Jamsocket` class include:
 
 The `Jamsocket` class is used by the [`InboundWorker`](#inboundworker) and [`OutboundWorker`](#outboundworker) classes to send and receive messages over the network. `Sound` messages are sent unreliably to achieve low-latency, while all other messages are sent reliably to ensure a consistent room state.
 
-Please note, that the packet types defined in the `jamsocket` module are *not* the same as the [`message`](#message) types described below. The `jamsocket` packets are used internally by `jamsocket` to choreograph reliable message sending, while [`Message`](#message) objects are used by the [`InboundWorker`](#inboundworker), [`OutboundWorker`](#outboundworker), and [`GameRunner`](#gamerunner) to exchange user lists and sounds.
+Please note, that the packet types defined in the `jamsocket` module are _not_ the same as the [`message`](#message) types described below. The `jamsocket` packets are used internally by `jamsocket` to choreograph reliable message sending, while [`Message`](#message) objects are used by the [`InboundWorker`](#inboundworker), [`OutboundWorker`](#outboundworker), and [`GameRunner`](#gamerunner) to exchange user lists and sounds.
 
 #### `badsocket`
 
